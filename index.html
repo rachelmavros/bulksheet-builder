@@ -137,6 +137,7 @@ code.k{font-family:"IBM Plex Mono",monospace;background:var(--rule-2);padding:1p
 .ce-line .cnt{font-family:"IBM Plex Mono",monospace;font-size:11.5px;width:46px;text-align:right;flex:none;color:var(--ink-3)}
 .ce-line .cnt.over{color:var(--err);font-weight:600}
 .ce-line select{width:64px;flex:none}
+.ce-flag{flex:none;display:flex}
 .ce-head{display:flex;gap:10px;align-items:baseline;margin:16px 0 4px}
 .ce-head h3{font-size:13.5px}
 .ce-head .sm{font-size:12px;color:var(--ink-3)}
@@ -145,6 +146,12 @@ code.k{font-family:"IBM Plex Mono",monospace;background:var(--rule-2);padding:1p
 .scope-row label{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--ink-2)}
 .camplist{margin-top:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px}
 .camplist label{display:flex;gap:7px;align-items:flex-start;font-size:12px;font-family:"IBM Plex Mono",monospace;color:var(--ink-2)}
+.infoq{appearance:none;width:15px;height:15px;border-radius:50%;border:1px solid var(--ink-3);background:none;color:var(--ink-3);font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;line-height:1;cursor:pointer;padding:0;vertical-align:1px}
+.infoq:hover{background:var(--ink-blue);border-color:var(--ink-blue);color:#fff}
+.borrow{display:flex;flex-wrap:wrap;gap:4px}
+.bchip{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;background:var(--rule-2);color:var(--ink-2);border-radius:3px;padding:2px 3px 2px 7px}
+.bchip button{appearance:none;border:0;background:none;color:var(--ink-3);cursor:pointer;font-size:14px;line-height:1;padding:0 3px}
+.bchip button:hover{color:var(--err)}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2);align-items:center}
 .sw{display:inline-block;width:12px;height:12px;border-radius:2px;border:1px solid rgba(0,0,0,.18);vertical-align:-1px;margin-right:5px}
 </style>
@@ -164,9 +171,10 @@ code.k{font-family:"IBM Plex Mono",monospace;background:var(--rule-2);padding:1p
   <button class="step" role="tab" data-step="0" aria-selected="true"><span class="num">1</span>Load file</button>
   <button class="step" role="tab" data-step="1" aria-selected="false" disabled><span class="num">2</span>Defaults</button>
   <button class="step" role="tab" data-step="2" aria-selected="false" disabled><span class="num">3</span>Campaigns</button>
-  <button class="step" role="tab" data-step="3" aria-selected="false" disabled><span class="num">4</span>Ad copy</button>
-  <button class="step" role="tab" data-step="4" aria-selected="false" disabled><span class="num">5</span>Extensions</button>
-  <button class="step" role="tab" data-step="5" aria-selected="false" disabled><span class="num">6</span>Review &amp; export</button>
+  <button class="step" role="tab" data-step="3" aria-selected="false" disabled><span class="num">4</span>Keywords</button>
+  <button class="step" role="tab" data-step="4" aria-selected="false" disabled><span class="num">5</span>Ad copy</button>
+  <button class="step" role="tab" data-step="5" aria-selected="false" disabled><span class="num">6</span>Extensions</button>
+  <button class="step" role="tab" data-step="6" aria-selected="false" disabled><span class="num">7</span>Review &amp; export</button>
 </div></nav>
 
 <div class="wrap">
@@ -232,11 +240,12 @@ code.k{font-family:"IBM Plex Mono",monospace;background:var(--rule-2);padding:1p
     <div class="panel-head"><h2>Campaign name template</h2><p>Pre-fills names on the next step. Everything stays editable there.</p></div>
     <div class="panel-body">
       <label class="fl" for="tpl">Template</label>
-      <input type="text" id="tpl" class="mono" value="Similac_US_English_{type}_{theme}_AMZ_{year}">
+      <input type="text" id="tpl" class="mono" value="{brand}_US_English_{type}_{theme}_AMZ_{year}">
       <p style="margin:8px 0 0;font-size:12.5px;color:var(--ink-3)">
-        Campaign name: <code class="k">{type}</code> Brand / Non-Brand / Competitive &middot; <code class="k">{theme}</code> theme minus its prefix &middot; <code class="k">{year}</code> &middot; <code class="k">{full}</code> raw theme.<br>
+        Campaign name: <code class="k">{brand}</code> &middot; <code class="k">{type}</code> Brand / Non-Brand / Competitive &middot; <code class="k">{theme}</code> theme minus its prefix &middot; <code class="k">{year}</code> &middot; <code class="k">{full}</code> raw theme.<br>
         Ad group name: <code class="k">{theme}</code> and <code class="k">{match type}</code>.</p>
       <div class="grid g3" style="margin-top:14px">
+        <div><label class="fl" for="brand">{brand} <span style="color:var(--ink-3);font-weight:400">&mdash; detected from the file</span></label><input type="text" id="brand" placeholder="Similac"></div>
         <div><label class="fl" for="tplYear">{year}</label><input type="text" id="tplYear" value="2026"></div>
         <div><label class="fl" for="agTpl">Ad group name</label><input type="text" id="agTpl" class="mono" value="{theme} - {match type}"></div>
         <div><label class="fl">Default match types</label>
@@ -272,6 +281,7 @@ code.k{font-family:"IBM Plex Mono",monospace;background:var(--rule-2);padding:1p
           <th style="width:250px">Campaign name</th><th style="width:170px">Ad group name</th>
           <th style="width:150px">Match types</th><th style="width:170px">RSA copy</th>
           <th style="width:90px">Path 1</th><th style="width:90px">Path 2</th>
+          <th style="width:230px">Also pull keywords from <button type="button" class="infoq" id="borrowInfo" title="What does this do?">i</button></th>
         </tr></thead><tbody></tbody></table></div>
       <div id="mapNotes" style="margin-top:14px"></div>
     </div>
@@ -280,6 +290,41 @@ code.k{font-family:"IBM Plex Mono",monospace;background:var(--rule-2);padding:1p
 
 <!-- STEP 4 : copy editor -->
 <div class="view hide" data-view="3">
+  <section class="panel">
+    <div class="panel-head"><h2>Keywords by campaign</h2><p>What each campaign gets, and what was held back.</p></div>
+    <div class="panel-body"><div class="tablewrap"><table id="kwCampTable">
+      <thead><tr><th>Campaign</th><th class="mono">Exported</th><th class="mono">Borrowed</th><th class="mono">Excluded</th><th class="mono">Duplicates</th><th class="mono">URL problems</th><th class="mono">Overlap</th></tr></thead>
+      <tbody></tbody></table></div>
+      <p style="margin:10px 0 0;font-size:12.5px;color:var(--ink-3)">Counts are keyword rows (one per match type). <b>Overlap</b> = rows whose keyword and match type also run in another campaign, so the two compete in the same auctions.</p>
+    </div>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h2 id="kwListTitle">Keyword list</h2><p id="kwListSub"></p><span class="spacer"></span><span class="tag" id="kwShown"></span></div>
+    <div class="panel-body">
+      <div class="grid g3" style="margin-bottom:12px">
+        <div><label class="fl" for="kwQ">Search</label><input type="text" id="kwQ" placeholder="keyword text"></div>
+        <div><label class="fl" for="kwCamp">Campaign</label><select id="kwCamp"></select></div>
+        <div><label class="fl" for="kwStatus">Show</label>
+          <select id="kwStatus">
+            <option value="excluded">Excluded (not MLR approved, conflicts, manual)</option>
+            <option value="url">URL problems</option>
+            <option value="borrowed">Borrowed from another theme</option>
+            <option value="override">Manual overrides</option>
+            <option value="dup">Duplicates (kept, flagged orange)</option>
+            <option value="included">Exported</option>
+            <option value="all">Everything</option>
+          </select></div>
+      </div>
+      <div class="note" style="margin-bottom:12px">Overrides apply to the keyword in its theme, everywhere it's used. <b>Include</b> on an unapproved keyword exports it shaded amber; <b>Exclude</b> drops an approved one. There's deliberately no bulk include &mdash; use the MLR filter on the Defaults step for that.</div>
+      <div class="tablewrap"><table id="kwTable">
+        <thead><tr><th>Keyword</th><th>Campaign / ad group</th><th>Match</th><th>Status</th><th>Final URL</th><th style="width:150px">Override</th></tr></thead>
+        <tbody></tbody></table></div>
+      <div id="kwMore" style="margin-top:10px"></div>
+    </div>
+  </section>
+</div>
+
+<div class="view hide" data-view="4">
   <section class="panel">
     <div class="panel-head">
       <h2>Ad copy</h2><p>Edit before export. Counts turn red past the limit.</p>
@@ -298,7 +343,7 @@ code.k{font-family:"IBM Plex Mono",monospace;background:var(--rule-2);padding:1p
 </div>
 
 <!-- STEP 5 : extensions -->
-<div class="view hide" data-view="4">
+<div class="view hide" data-view="5">
   <section class="panel">
     <div class="panel-head"><h2>Extensions</h2>
       <p>Checked extensions apply to <b>every selected campaign</b> unless you narrow the scope.</p></div>
@@ -330,7 +375,7 @@ code.k{font-family:"IBM Plex Mono",monospace;background:var(--rule-2);padding:1p
 </div>
 
 <!-- STEP 6 -->
-<div class="view hide" data-view="5">
+<div class="view hide" data-view="6">
   <section class="panel">
     <div class="panel-head"><h2>Output summary</h2></div>
     <div class="panel-body">
@@ -345,6 +390,7 @@ code.k{font-family:"IBM Plex Mono",monospace;background:var(--rule-2);padding:1p
       <div class="legend" style="margin-bottom:10px">
         <span><span class="sw" style="background:#f8c9c4"></span>Over the character limit or missing a URL</span>
         <span><span class="sw" style="background:#ffe08a"></span>Not MLR approved, included by override</span>
+        <span><span class="sw" style="background:#ffc000"></span>Duplicate row &mdash; pick which copy to keep</span>
       </div>
       <div class="tablewrap" id="prevWrap"></div>
     </div>
@@ -362,10 +408,10 @@ code.k{font-family:"IBM Plex Mono",monospace;background:var(--rule-2);padding:1p
 
 <script>
 "use strict";
-const S = {step:0, ceTheme:null, raw:null, map:[], ext:{sitelinks:[],callouts:[],snippets:[]}, copy:{}, out:null, issues:[], campaigns:[], fills:{}, defMatch:["Exact","Broad"], redCount:{kw:0,hl:0,de:0,ext:0}};
+const S = {step:0, ceTheme:null, kwOverride:{}, kwLog:[], overlap:{}, kwFilter:{q:"", camp:"", status:"excluded"}, raw:null, map:[], ext:{sitelinks:[],callouts:[],snippets:[]}, copy:{}, out:null, issues:[], campaigns:[], fills:{}, defMatch:["Exact","Broad"], redCount:{kw:0,hl:0,de:0,ext:0}};
 const MATCHES = ["Exact","Phrase","Broad"];
 const LIMITS = {headline:30, description:90, path:15, sitelinkText:25, sitelinkDesc:35, callout:25, snippetValue:25};
-const FILL_ERR = "FFF8C9C4", FILL_WARN = "FFFFE08A";
+const FILL_ERR = "FFF8C9C4", FILL_WARN = "FFFFE08A", FILL_DUP = "FFFFC000";
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 const esc = s => String(s==null?"":s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -375,7 +421,10 @@ const isUsableURL = u => /^https?:\/\/\S+\.\S/i.test(String(u||"").trim());
 function urlProblem(u){
   const v = String(u||"").trim();
   if(!v) return "No final URL";
-  if(!isUsableURL(v)) return `Not a usable URL \u2014 "${v}" is placeholder text, not a link`;
+  if(!isUsableURL(v)){
+    if(/^(www\.)?[a-z0-9-]+(\.[a-z0-9-]+)+(\/\S*)?$/i.test(v)) return `Missing https:// \u2014 "${v}" needs the full address, including https://`;
+    return `Not a usable URL \u2014 "${v}" is placeholder text, not a link`;
+  }
   return "";
 }
 
@@ -391,9 +440,18 @@ function isRedStyle(st){
   const r = parseInt(rgb.slice(0,2),16), g = parseInt(rgb.slice(2,4),16), b = parseInt(rgb.slice(4,6),16);
   return r >= 140 && g <= 95 && b <= 95 && (r - Math.max(g,b)) >= 60;
 }
-function cellRed(ws, r, c){
-  const a = XLSX.utils.encode_cell({r, c});
-  const cell = ws[a];
+/* header text before any "(Character Limit...)" or line break, lowercased */
+function headKey(v){ return clean(v).split(/\n|\(/)[0].replace(/\s+/g," ").trim().toLowerCase(); }
+/* a written note anywhere on the row that says the asset isn't approved yet */
+const PENDING_RX = /pending\s+(mlr|legal|approval|review)|not\s+(yet\s+)?(mlr\s+)?approved|awaiting\s+(mlr|approval|legal)|mlr\s+pending|needs\s+mlr/i;
+function rowPending(row){
+  for(const v of (row || [])){ const t = clean(v); if(t && PENDING_RX.test(t)) return true; }
+  return false;
+}
+function cellRed(sh, r, c){
+  if(c === undefined || c === null) return false;
+  const a = XLSX.utils.encode_cell({r: r + sh.off.r, c: c + sh.off.c});
+  const cell = sh.ws[a];
   return !!(cell && isRedStyle(cell.s));
 }
 
@@ -414,9 +472,9 @@ function loadLocal(){
     if(d.label != null) $("#dLabel").value = d.label;
     if(d.extStatus) $("#dExtStatus").value = d.extStatus;
     if(d.snipStatus) $("#dSnippetStatus").value = d.snipStatus;
-    if(d.tpl) $("#tpl").value = d.tpl;
+    if(d.tpl) $("#tpl").value = d.tpl.replace(/^(Similac|PediaSure|Pedialyte|Ensure|Glucerna|EleCare)_/i, "{brand}_");
     if(d.year) $("#tplYear").value = d.year;
-    if(d.agTpl) $("#agTpl").value = d.agTpl;
+    if(d.agTpl) $("#agTpl").value = d.agTpl.replace(/\{base\}/gi, "{theme}").replace(/\{match\}/gi, "{match type}");
     if(typeof d.strip === "boolean") $("#stripParens").checked = d.strip;
     if(typeof d.omitRed === "boolean") $("#omitRed").checked = d.omitRed;
     if(Array.isArray(d.defMatch) && d.defMatch.length){ S.defMatch = d.defMatch; syncDefChips(); }
@@ -429,14 +487,15 @@ function go(n){
   $$(".view").forEach(v => v.classList.toggle("hide", +v.dataset.view !== n));
   $$(".step").forEach(b => b.setAttribute("aria-selected", +b.dataset.step === n));
   $("#back").disabled = n === 0;
-  $("#next").classList.toggle("hide", n === 5);
-  $("#dl").classList.toggle("hide", n !== 5);
+  $("#next").classList.toggle("hide", n === 6);
+  $("#dl").classList.toggle("hide", n !== 6);
   $("#barMsg").textContent = "";
   if(n === 1) renderRedSummary();
   if(n === 2) renderMap();
-  if(n === 3) renderCopyEditor();
-  if(n === 4) renderExt();
-  if(n === 5){ build(); renderReview(); }
+  if(n === 3){ build(); renderKeywords(); }
+  if(n === 4) renderCopyEditor();
+  if(n === 5) renderExt();
+  if(n === 6){ build(); renderReview(); }
   window.scrollTo({top:0, behavior:"instant"});
 }
 $$(".step").forEach(b => b.addEventListener("click", () => { if(!b.disabled) go(+b.dataset.step); }));
@@ -444,7 +503,7 @@ $("#back").addEventListener("click", () => go(Math.max(0, S.step - 1)));
 $("#next").addEventListener("click", () => {
   if(S.step === 0 && !S.raw){ $("#barMsg").textContent = "Load a submission file first."; return; }
   if(S.step === 2 && !S.map.some(m => m.on)){ $("#barMsg").textContent = "Select at least one theme."; return; }
-  saveLocal(); go(Math.min(5, S.step + 1));
+  saveLocal(); go(Math.min(6, S.step + 1));
 });
 $("#resetAll").addEventListener("click", () => { if(confirm("Clear the loaded file and start over?")) location.reload(); });
 
@@ -468,7 +527,10 @@ function sheetOf(wb, test){
   const nm = wb.SheetNames.find(n => test(n.toLowerCase()));
   if(!nm) return null;
   const ws = wb.Sheets[nm];
-  return {name:nm, ws, grid:XLSX.utils.sheet_to_json(ws, {header:1, blankrows:true, defval:null, raw:false})};
+  // sheet_to_json starts at the used range, which is not always A1; keep the offset
+  // so grid positions can be mapped back to real cell addresses for fill lookups
+  const off = ws["!ref"] ? XLSX.utils.decode_range(ws["!ref"]).s : {r:0, c:0};
+  return {name:nm, ws, off, grid:XLSX.utils.sheet_to_json(ws, {header:1, blankrows:true, defval:null, raw:false})};
 }
 function findHeader(grid, needles, scan){
   const lim = Math.min(grid.length, scan || 25);
@@ -484,9 +546,14 @@ function findHeader(grid, needles, scan){
 }
 function colsOf(row, needles){
   const out = {};
-  for(let i = 0; i < row.length; i++){
-    const v = clean(row[i]).toLowerCase(); if(!v) continue;
-    for(const k in needles) if(out[k] === undefined && needles[k].some(n => v.includes(n))) out[k] = i;
+  for(const k in needles){
+    for(const n of needles[k]){                 // needles are in priority order
+      for(let i = 0; i < row.length; i++){
+        const v = clean(row[i]).toLowerCase();
+        if(v && v.includes(n) && !Object.values(out).includes(i)){ out[k] = i; break; }
+      }
+      if(out[k] !== undefined) break;
+    }
   }
   return out;
 }
@@ -499,7 +566,7 @@ function parseWorkbook(wb, fname){
   const kwS = sheetOf(wb, n => n.includes("keyword")) || sheetOf(wb, () => true);
   let keywords = [];
   if(kwS){
-    const h = findHeader(kwS.grid, {anchor:["keyword theme","theme"], kw:["keyword"], lp:["landing page","landing url","final url","destination"], msg:["ad message","ad copy","rsa"], mt:["match type","match"]});
+    const h = findHeader(kwS.grid, {anchor:["keyword theme","theme"], kw:["keyword"], lp:["landing page","landing url","final url","destination"], msg:["ad message","message","ad copy","product","rsa"], mt:["match type","match"]});
     if(h){
       const c = h.cols;
       if(c.kw === c.anchor){
@@ -513,9 +580,10 @@ function parseWorkbook(wb, fname){
         const row = kwS.grid[r] || [];
         const theme = clean(row[c.anchor]), kw = clean(row[c.kw]);
         if(!theme || !kw) continue;
-        const red = cellRed(kwS.ws, r, c.kw) || cellRed(kwS.ws, r, c.anchor);
+        const pend = rowPending(row);
+        const red = cellRed(kwS, r, c.kw) || cellRed(kwS, r, c.anchor) || pend;
         if(red) S.redCount.kw++;
-        keywords.push({theme, kw, red,
+        keywords.push({theme, kw, red, why: pend && !cellRed(kwS, r, c.kw) ? "note" : "fill",
           url: c.lp !== undefined ? clean(row[c.lp]) : "",
           msg: c.msg !== undefined ? clean(row[c.msg]) : "",
           mt:  c.mt  !== undefined ? clean(row[c.mt])  : ""});
@@ -528,23 +596,26 @@ function parseWorkbook(wb, fname){
   const rsaS = sheetOf(wb, n => n.includes("responsive") || n.includes("rsa") || n.includes("ad copy"));
   const rsa = {};
   if(rsaS){
-    const h = findHeader(rsaS.grid, {anchor:["campaign theme"], hl:["available headline","headline"], hlPin:["pin to headline"], de:["available description","description line"], dePin:["pin to description"], du:["display url","display text"]});
+    const h = findHeader(rsaS.grid, {anchor:["campaign theme","keyword theme","ad theme","ad group theme","ad name","theme"], hl:["available headline","headline"], hlPin:["pin to headline"], de:["available description","description line"], dePin:["pin to description"], du:["display url","display text"]});
     if(h){
       const c = h.cols;
       for(let r = h.row + 1; r < rsaS.grid.length; r++){
         const row = rsaS.grid[r] || [];
         const theme = clean(row[c.anchor]);
-        if(!theme || theme.toLowerCase() === "campaign theme") continue;
+        if(!theme) continue;
+        // repeated header rows inside the tab ("Keyword Theme" / "Available Headlines ...")
+        if(/theme$/i.test(theme) || /available headline/i.test(clean(row[c.hl]))) continue;
+        const pend = rowPending(row);
         const t = rsa[theme] || (rsa[theme] = {headlines:[], descriptions:[], urls:[]});
         const hv = c.hl !== undefined ? clean(row[c.hl]) : "";
         if(hv && !isFormula(hv) && !/^\(character limit/i.test(hv)){
-          const red = cellRed(rsaS.ws, r, c.hl); if(red) S.redCount.hl++;
-          t.headlines.push({text:hv, pin: c.hlPin !== undefined ? clean(row[c.hlPin]) : "", red});
+          const fr = cellRed(rsaS, r, c.hl), red = fr || pend; if(red) S.redCount.hl++;
+          t.headlines.push({text:hv, pin: c.hlPin !== undefined ? clean(row[c.hlPin]) : "", red, why: fr ? "fill" : "note"});
         }
         const dv = c.de !== undefined ? clean(row[c.de]) : "";
         if(dv && !isFormula(dv) && !/^\(character limit/i.test(dv)){
-          const red = cellRed(rsaS.ws, r, c.de); if(red) S.redCount.de++;
-          t.descriptions.push({text:dv, pin: c.dePin !== undefined ? clean(row[c.dePin]) : "", red});
+          const fr = cellRed(rsaS, r, c.de), red = fr || pend; if(red) S.redCount.de++;
+          t.descriptions.push({text:dv, pin: c.dePin !== undefined ? clean(row[c.dePin]) : "", red, why: fr ? "fill" : "note"});
         }
         const uv = c.du !== undefined ? clean(row[c.du]) : "";
         if(uv && !isFormula(uv) && !/display url/i.test(uv)) t.urls.push(uv);
@@ -561,10 +632,14 @@ function parseWorkbook(wb, fname){
     for(let r = 0; r < g.length; r++){
       const row = g[r] || [];
       for(let c = 0; c < row.length; c++){
-        const v = clean(row[c]).toLowerCase();
-        if(v === "sitelink text") anchors.push({kind:"sitelinks", r, c, cols:colsOf(row, {d1:["description line 1","description 1"], d2:["description line 2","description 2"], url:["destination url","final url"]})});
-        else if(v === "callout text") anchors.push({kind:"callouts", r, c, cols:{}});
-        else if(v.includes("structured snippet")) anchors.push({kind:"snippets", r, c, cols:colsOf(row, {val:["values"]})});
+        const v = headKey(row[c]);
+        if(!v) continue;
+        if(/^sitelinks?( text)?$/.test(v) || v === "sitelink text")
+          anchors.push({kind:"sitelinks", r, c, cols:colsOf(row, {d1:["description line 1","description 1","desc 1","description1"], d2:["description line 2","description 2","desc 2","description2"], url:["destination url","final url","landing page","url"]})});
+        else if(/^callouts?( text)?$/.test(v))
+          anchors.push({kind:"callouts", r, c, cols:{}});
+        else if(/^structured snippets?( header)?s?$/.test(v) || (v.includes("structured snippet") && v.includes("header")) || v === "snippet header")
+          anchors.push({kind:"snippets", r, c, cols:colsOf(row, {val:["value"]})});
       }
     }
     anchors.sort((a,b) => a.r - b.r);
@@ -574,16 +649,22 @@ function parseWorkbook(wb, fname){
         const row = g[r] || [];
         const main = clean(row[a.c]);
         if(!main || isFormula(main) || /^\(character limit/i.test(main)) continue;
-        const flag = clean(row[0]);
-        const red = cellRed(exS.ws, r, a.c);
+        const flag = exS.off.c === 0 ? clean(row[0]) : "";
+        const pend = rowPending(row);
+        const red = cellRed(exS, r, a.c) || pend;
         if(red) S.redCount.ext++;
-        const preset = !!flag && flag.length <= 3 && a.c !== 0 && !red;
-        const base = {on:preset, red, scope:"all", camps:[]};
+        const preset = !!flag && flag.length <= 3 && (a.c + exS.off.c) !== 0 && !red;
+        const base = {on:preset, red, why: cellRed(exS, r, a.c) ? "fill" : "note", scope:"all", camps:[]};
         if(a.kind === "sitelinks") ext.sitelinks.push(Object.assign(base, {text:main, d1:a.cols.d1!==undefined?clean(row[a.cols.d1]):"", d2:a.cols.d2!==undefined?clean(row[a.cols.d2]):"", url:a.cols.url!==undefined?clean(row[a.cols.url]):""}));
         else if(a.kind === "callouts") ext.callouts.push(Object.assign(base, {text:main}));
         else ext.snippets.push(Object.assign(base, {header:main, values:a.cols.val!==undefined?clean(row[a.cols.val]):""}));
       }
     });
+    const allExt = ext.sitelinks.concat(ext.callouts, ext.snippets);
+    if(allExt.length && !allExt.some(o => o.on)){
+      allExt.forEach(o => { o.on = !o.red; });
+      notes.push(`No selection marks in column A, so every approved extension starts selected.`);
+    }
     notes.push(`Extensions tab <b>${esc(exS.name)}</b> &mdash; ${ext.sitelinks.length} sitelinks, ${ext.callouts.length} callouts, ${ext.snippets.length} snippet sets.`);
   } else notes.push(`<span class="tag warn">no Ad Extensions tab</span> extension tabs will be empty.`);
 
@@ -593,6 +674,7 @@ function parseWorkbook(wb, fname){
   }
 
   S.raw = {keywords, rsa, ext, fname};
+  $("#brand").value = detectBrand(fname, keywords, rsa) || $("#brand").value;
   S.ext = ext;
   buildCopy();
   buildMap();
@@ -612,14 +694,23 @@ function parseWorkbook(wb, fname){
   $("#barMsg").textContent = "Parsed. Continue.";
 }
 
+const BRANDS = ["PediaSure","Pedialyte","Similac","Ensure","Glucerna","EleCare"];
+function detectBrand(fname, keywords, rsa){
+  const hay = (fname + " " + Object.keys(rsa).join(" ")).toLowerCase();
+  const hit = BRANDS.find(b => hay.includes(b.toLowerCase()));
+  if(hit) return hit;
+  const counts = BRANDS.map(b => [b, keywords.filter(k => k.kw.toLowerCase().includes(b.toLowerCase())).length]).sort((a,b) => b[1]-a[1]);
+  return counts[0][1] ? counts[0][0] : "";
+}
+
 /* --- working copy of ad text -------------------------------------------- */
 function buildCopy(){
   S.copy = {};
   for(const theme in S.raw.rsa){
     const t = S.raw.rsa[theme];
     S.copy[theme] = {
-      headlines: t.headlines.map(h => ({text:h.text, pin:h.pin, red:h.red, on:!h.red})),
-      descriptions: t.descriptions.map(d => ({text:d.text, pin:d.pin, red:d.red, on:!d.red})),
+      headlines: t.headlines.map(h => ({text:h.text, pin:h.pin, red:h.red, why:h.why, on:!h.red})),
+      descriptions: t.descriptions.map(d => ({text:d.text, pin:d.pin, red:d.red, why:d.why, on:!d.red})),
       urls: t.urls.slice()
     };
   }
@@ -662,8 +753,13 @@ function baseName(theme){
 }
 function campaignName(theme){
   return ($("#tpl").value || "{full}")
-    .replace(/\{type\}/g, classify(theme)).replace(/\{theme\}/g, baseName(theme))
+    .replace(/\{brand\}/g, $("#brand").value.trim() || "BRAND").replace(/\{type\}/g, classify(theme)).replace(/\{theme\}/g, baseName(theme))
     .replace(/\{year\}/g, $("#tplYear").value || "").replace(/\{full\}/g, theme).trim();
+}
+function borrowBase(theme, dest){
+  let b = baseName(theme);
+  if(b.toLowerCase() === dest.base.toLowerCase()) b = `${b} (${classify(theme)})`;
+  return b;
 }
 function adGroupName(base, match){
   return ($("#agTpl").value || "{theme} - {match type}")
@@ -673,7 +769,7 @@ function adGroupName(base, match){
 function guessRsa(theme, msg){
   const names = Object.keys(S.raw.rsa);
   if(!names.length) return "";
-  const norm = s => s.toLowerCase().replace(/[^a-z0-9 ]/g," ").replace(/\b(ad|ads|campaign|theme|similac)\b/g," ").replace(/\s+/g," ").trim();
+  const norm = s => s.toLowerCase().replace(/[\u00ae\u2122]/g,"").replace(/[^a-z0-9 ]/g," ").replace(/\b(ad|ads|campaign|theme|copy)\b/g," ").replace(/\s+/g," ").trim();
   const cands = [msg, baseName(theme), theme].filter(Boolean).map(norm);
   let best = "", bs = 0;
   for(const n of names){
@@ -681,8 +777,9 @@ function guessRsa(theme, msg){
     for(const c of cands){
       if(!nn || !c) continue;
       let sc = 0;
+      const ov = nn.split(" ").filter(w => w && c.split(" ").includes(w)).length;
       if(nn === c) sc = 100;
-      else if(c.includes(nn) || nn.includes(c)) sc = 70;
+      else if(c.includes(nn) || nn.includes(c)) sc = 70 + ov;   // longer shared phrase wins ties
       else { const a = new Set(nn.split(" ")), b = new Set(c.split(" ")); let hit = 0; a.forEach(w => { if(w && b.has(w)) hit++; }); sc = hit ? (hit/Math.max(a.size,b.size))*60 : 0; }
       if(sc > bs){ bs = sc; best = n; }
     }
@@ -709,10 +806,12 @@ function buildMap(){
   const byTheme = new Map();
   S.raw.keywords.forEach(k => { if(!byTheme.has(k.theme)) byTheme.set(k.theme, []); byTheme.get(k.theme).push(k); });
   S.map = Array.from(byTheme.entries()).map(([theme, rows]) => {
-    const msg = (rows.find(r => r.msg) || {}).msg || "";
+    const mc = {}; rows.forEach(r => { if(r.msg) mc[r.msg] = (mc[r.msg]||0)+1; });
+    const msg = Object.keys(mc).sort((a,b) => mc[b]-mc[a])[0] || "";
     const rsaTheme = guessRsa(theme, msg), p = pathsFrom(rsaTheme);
-    return {theme, count:rows.length, red:rows.filter(r => r.red).length, msg,
-      on: !/tbd|not currently supporting|n\/a/i.test(msg),
+    const allRed = rows.length > 0 && rows.every(r => r.red);
+    return {theme, count:rows.length, red:rows.filter(r => r.red).length, msg, allRed,
+      on: !/tbd|not currently supporting|n\/a/i.test(msg) && !(allRed && $("#omitRed").checked),
       campaign:campaignName(theme), base:baseName(theme), matches:S.defMatch.slice(),
       rsaTheme, path1:p[0], path2:p[1], finalUrl:modeURL(rows.filter(r=>!r.red).map(r=>r.url))};
   });
@@ -734,7 +833,7 @@ function renderMap(){
   tb.innerHTML = S.map.map((m, i) => `
     <tr class="${m.on?"":"off"}">
       <td><input type="checkbox" data-i="${i}" data-f="on" ${m.on?"checked":""}></td>
-      <td><div>${esc(m.theme)}</div>${m.msg?`<div style="font-size:11.5px;color:var(--ink-3)">${esc(m.msg)}</div>`:""}</td>
+      <td><div>${esc(m.theme)}${m.allRed?` ${badge({why:"fill"})} <span style="font-size:11.5px;color:var(--err)">every keyword unapproved</span>`:""}</div>${m.msg?`<div style="font-size:11.5px;color:var(--ink-3)">${esc(m.msg)}</div>`:""}</td>
       <td class="mono">${omit && m.red ? (m.count-m.red)+` <button type="button" class="redflag" title="Not MLR approved \u2014 click for detail">-${m.red}</button>` : m.count}</td>
       <td><input type="text" class="mono" data-i="${i}" data-f="campaign" value="${esc(m.campaign)}"></td>
       <td><input type="text" data-i="${i}" data-f="base" value="${esc(m.base)}"></td>
@@ -742,11 +841,22 @@ function renderMap(){
       <td><select data-i="${i}" data-f="rsaTheme"><option value="">&mdash; no ad &mdash;</option>${rsaNames.map(n=>`<option ${n===m.rsaTheme?"selected":""}>${esc(n)}</option>`).join("")}</select></td>
       <td><input type="text" data-i="${i}" data-f="path1" value="${esc(m.path1)}" maxlength="15"></td>
       <td><input type="text" data-i="${i}" data-f="path2" value="${esc(m.path2)}" maxlength="15"></td>
+      <td>
+        <div class="borrow">${(m.extra||[]).map(t => `<span class="bchip">${esc(t)}<button type="button" data-unborrow="${i}" data-t="${esc(t)}" title="remove">&times;</button></span>`).join("")}</div>
+        <select data-borrow="${i}" style="margin-top:4px"><option value="">+ add keyword set&hellip;</option>${S.map.filter(x => x.theme !== m.theme && !(m.extra||[]).includes(x.theme)).map(x => `<option>${esc(x.theme)}</option>`).join("")}</select>
+      </td>
     </tr>`).join("");
   tb.querySelectorAll("input,select").forEach(el => el.addEventListener("change", e => {
     const i = +e.target.dataset.i, f = e.target.dataset.f; if(!f) return;
     S.map[i][f] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
     if(f === "on") e.target.closest("tr").classList.toggle("off", !e.target.checked);
+  }));
+  tb.querySelectorAll("select[data-borrow]").forEach(sel => sel.addEventListener("change", e => {
+    const i = +e.target.dataset.borrow, t = e.target.value; if(!t) return;
+    S.map[i].extra = (S.map[i].extra || []).concat([t]); renderMap();
+  }));
+  tb.querySelectorAll("[data-unborrow]").forEach(b => b.addEventListener("click", () => {
+    const i = +b.dataset.unborrow; S.map[i].extra = (S.map[i].extra || []).filter(x => x !== b.dataset.t); renderMap();
   }));
   tb.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => {
     const i = +c.dataset.i, m = c.dataset.m, row = S.map[i];
@@ -759,8 +869,109 @@ function renderMap(){
   let notes = "";
   if(noAd.length) notes += `<div class="note warn">${noAd.length} selected theme${noAd.length>1?"s have":" has"} no RSA copy matched, so no ad rows will be written: ${noAd.map(m=>esc(m.theme)).join(", ")}.</div>`;
   if(dupNames.length) notes += `<div class="note" style="margin-top:8px">${dupNames.length} campaign name${dupNames.length>1?"s are":" is"} shared by more than one theme, so their keywords merge into one campaign: ${dupNames.map(esc).join(", ")}.</div>`;
+  const borrowing = S.map.filter(m => m.on && (m.extra||[]).length);
+  if(borrowing.length) notes += `<div class="note" style="margin-top:8px"><b>Borrowed keyword sets:</b> ${borrowing.map(m => `${esc(m.campaign)} &larr; ${m.extra.map(esc).join(", ")}`).join("; ")}. Each gets its own ad groups in that campaign, keeps its original landing pages, and runs that campaign's ad. The originals stay in their own campaigns too.</div>`;
   $("#mapNotes").innerHTML = notes;
 }
+
+/* --- keywords review ---------------------------------------------------- */
+const KW_PAGE = 250;
+function renderKeywords(){
+  const log = S.kwLog || [];
+  const camps = S.campaigns || [];
+  const stat = {};
+  camps.forEach(c => stat[c] = {inc:0, bor:0, exc:0, url:0, dup:0});
+  log.forEach(r => {
+    const st = stat[r.campaign]; if(!st) return;
+    if(r.include){ st.inc++; if(r.borrowed) st.bor++; if(r.urlProb) st.url++; if(r.dup) st.dup++; }
+    else st.exc++;
+  });
+  $("#kwCampTable tbody").innerHTML = camps.length ? camps.map(c => {
+    const st = stat[c], ov = S.overlap[c] || 0;
+    const heavy = st.exc && st.exc >= st.inc;
+    return `<tr><td class="mono">${esc(c)}</td>
+      <td class="mono">${st.inc}</td>
+      <td class="mono">${st.bor || ""}</td>
+      <td class="mono">${st.exc ? `<a href="#" data-jump="${esc(c)}" style="color:${heavy?"var(--err)":"inherit"}">${st.exc}</a>` : ""}</td>
+      <td class="mono">${st.dup ? `<span class="tag" style="background:#ffc000;color:#3a1f1c">${st.dup}</span>` : ""}</td>
+      <td class="mono">${st.url ? `<span class="tag err">${st.url}</span>` : ""}</td>
+      <td class="mono">${ov ? `<span class="tag warn">${ov}</span>` : ""}</td></tr>`;
+  }).join("") : `<tr><td colspan="7" style="color:var(--ink-3)">No campaigns selected.</td></tr>`;
+  $$("#kwCampTable [data-jump]").forEach(a => a.addEventListener("click", e => {
+    e.preventDefault(); S.kwFilter.camp = a.dataset.jump; S.kwFilter.status = "excluded"; S.kwPage = 1; syncKwFilters(); drawKwList();
+    $("#kwTable").scrollIntoView({behavior:"smooth", block:"start"});
+  }));
+  const sel = $("#kwCamp");
+  sel.innerHTML = `<option value="">All campaigns</option>` + camps.map(c => `<option ${c===S.kwFilter.camp?"selected":""}>${esc(c)}</option>`).join("");
+  syncKwFilters();
+  S.kwPage = 1;
+  drawKwList();
+}
+function syncKwFilters(){
+  $("#kwQ").value = S.kwFilter.q; $("#kwStatus").value = S.kwFilter.status;
+  $("#kwCamp").value = S.kwFilter.camp;
+}
+function kwMatches(r){
+  const f = S.kwFilter;
+  if(f.camp && r.campaign !== f.camp) return false;
+  if(f.q && !r.kw.toLowerCase().includes(f.q.toLowerCase())) return false;
+  switch(f.status){
+    case "excluded": return !r.include && !r.dup;
+    case "url": return r.include && !!r.urlProb;
+    case "borrowed": return r.borrowed;
+    case "override": return !!r.override;
+    case "dup": return r.dup;
+    case "included": return r.include;
+    default: return true;
+  }
+}
+function drawKwList(){
+  const rows = (S.kwLog || []).filter(kwMatches);
+  const shown = rows.slice(0, KW_PAGE * (S.kwPage || 1));
+  $("#kwShown").textContent = `${rows.length} row${rows.length===1?"":"s"}`;
+  const TITLES = {
+    excluded:["Excluded keywords only", "Not the full set \u2014 these are held back from the export. Change \u201cShow\u201d to see everything."],
+    url:["Keywords with URL problems", "Exported rows whose final URL isn't usable."],
+    borrowed:["Borrowed keywords", "Pulled into a campaign from another theme."],
+    override:["Manual overrides", "Keywords you've forced in or out."],
+    dup:["Duplicate rows", "Kept in the export and shaded orange. Decide which copy to keep \u2014 nothing is removed automatically."],
+    included:["Exported keywords", "Everything going into the bulksheet."],
+    all:["All keywords", "Exported and excluded."]
+  };
+  const tt = TITLES[S.kwFilter.status] || TITLES.all;
+  $("#kwListTitle").textContent = tt[0];
+  $("#kwListSub").textContent = tt[1];
+  const statusCell = r => {
+    if(r.dup) return `<span class="tag" style="background:#ffc000;color:#3a1f1c">duplicate \u2014 kept</span>`;
+    if(!r.include){
+      const b = r.reason === "Pending MLR note" ? badge({why:"note"}) : (r.reason === "Red fill" || r.reason === "Red elsewhere in theme") ? badge({why:"fill"}) : "";
+      return `${b} <span style="font-size:12px;color:var(--ink-2)">${esc(r.reason || "excluded")}</span>`;
+    }
+    if(r.reason && r.reason !== "Excluded manually") return `<span class="tag warn">exported, not approved</span>`;
+    return `<span class="tag ok">exported</span>`;
+  };
+  $("#kwTable tbody").innerHTML = shown.length ? shown.map(r => `
+    <tr>
+      <td><b style="font-weight:500">${esc(r.kw)}</b>${r.borrowed?` <span class="tag" title="Borrowed from ${esc(r.theme)}">from ${esc(r.theme)}</span>`:""}</td>
+      <td class="mono" style="font-size:11.5px">${esc(r.campaign)}<br><span style="color:var(--ink-3)">${esc(r.ag)}</span></td>
+      <td class="mono">${esc(r.match)}</td>
+      <td>${statusCell(r)}</td>
+      <td class="mono" style="font-size:11px;max-width:260px;word-break:break-all">${r.urlProb?`<span class="tag err" title="${esc(r.urlProb)}">bad URL</span> `:""}${esc((r.url||"").slice(0,70))}</td>
+      <td>${`<div class="chips" data-key="${esc(r.key)}">
+        ${["","include","exclude"].map(v => `<button class="chip" data-ov="${v}" aria-pressed="${(r.override||"")===v}">${v?v[0].toUpperCase()+v.slice(1):"Auto"}</button>`).join("")}</div>`}</td>
+    </tr>`).join("") : `<tr><td colspan="6" style="color:var(--ink-3);padding:16px">Nothing matches this filter.</td></tr>`;
+  $("#kwMore").innerHTML = rows.length > shown.length ? `<button class="btn sm" id="kwMoreBtn">Show ${Math.min(KW_PAGE, rows.length - shown.length)} more of ${rows.length - shown.length}</button>` : "";
+  const more = $("#kwMoreBtn"); if(more) more.addEventListener("click", () => { S.kwPage = (S.kwPage||1) + 1; drawKwList(); });
+  $$("#kwTable .chips").forEach(box => box.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => {
+    const k = box.dataset.key, v = c.dataset.ov;
+    if(v) S.kwOverride[k] = v; else delete S.kwOverride[k];
+    const keepPage = S.kwPage;
+    build(); renderKeywords(); S.kwPage = keepPage; drawKwList();
+  })));
+}
+$("#kwQ").addEventListener("input", e => { S.kwFilter.q = e.target.value; S.kwPage = 1; drawKwList(); });
+$("#kwCamp").addEventListener("change", e => { S.kwFilter.camp = e.target.value; S.kwPage = 1; drawKwList(); });
+$("#kwStatus").addEventListener("change", e => { S.kwFilter.status = e.target.value; S.kwPage = 1; drawKwList(); });
 
 /* --- copy editor -------------------------------------------------------- */
 function adNames(){ return Object.keys(S.copy); }
@@ -795,11 +1006,11 @@ function drawCopy(theme){
     <div class="ce-line">
       <input type="checkbox" data-k="${kind}" data-i="${i}" ${o.on?"checked":""} title="include">
       <input type="text" data-k="${kind}" data-i="${i}" data-f="text" value="${esc(o.text)}">
+      ${o.red?`<span class="ce-flag">${badge(o)}</span>`:""}
       <span class="cnt ${o.text.length>limit?"over":""}" data-c="${kind}${i}">${o.text.length}/${limit}</span>
       <select data-k="${kind}" data-i="${i}" data-f="pin" title="pin position">
         <option value="">-</option>${[1,2,3].map(p=>`<option ${String(o.pin).trim()==String(p)?"selected":""}>${p}</option>`).join("")}
       </select>
-      ${o.red?`<button type="button" class="redflag" title="Not MLR approved \u2014 click for detail">RED</button>`:""}
     </div>`;
   $("#ceBody").innerHTML = `
     <div class="note ${used.length?"":"warn"}">${used.length
@@ -858,14 +1069,14 @@ function renderExt(){
     : `<b>No campaigns selected yet.</b> Go back to step 3 and choose at least one theme.`;
   const rows = {
     sitelinks:(o,i)=>`<div class="sl-row"><input type="checkbox" data-k="sitelinks" data-i="${i}" ${o.on?"checked":""}>
-      <span class="txt"><span class="t1">${esc(o.text)}</span> ${lim(o.text,LIMITS.sitelinkText)} ${o.red?`<button type="button" class="redflag" title="Not MLR approved \u2014 click for detail">RED</button>`:""}
+      <span class="txt"><span class="t1">${esc(o.text)}</span> ${lim(o.text,LIMITS.sitelinkText)} ${o.red?badge(o):""}
       <span class="t2">${esc(o.d1)} ${lim(o.d1,LIMITS.sitelinkDesc)} &middot; ${esc(o.d2)} ${lim(o.d2,LIMITS.sitelinkDesc)}<br>${o.url && /^https?:\/\//i.test(o.url)?esc(o.url):`<span class="tag err">${o.url?esc(o.url):"no URL"} &mdash; not a usable URL</span>`}</span>
       ${o.on?scopeUI("sitelinks",i,o,camps):""}</span></div>`,
     callouts:(o,i)=>`<div class="sl-row"><input type="checkbox" data-k="callouts" data-i="${i}" ${o.on?"checked":""}>
-      <span class="txt"><span class="t1">${esc(o.text)}</span> ${lim(o.text,LIMITS.callout)} ${o.red?`<button type="button" class="redflag" title="Not MLR approved \u2014 click for detail">RED</button>`:""}
+      <span class="txt"><span class="t1">${esc(o.text)}</span> ${lim(o.text,LIMITS.callout)} ${o.red?badge(o):""}
       ${o.on?scopeUI("callouts",i,o,camps):""}</span></div>`,
     snippets:(o,i)=>`<div class="sl-row"><input type="checkbox" data-k="snippets" data-i="${i}" ${o.on?"checked":""}>
-      <span class="txt"><span class="t1">${esc(o.header)}</span> ${o.red?`<button type="button" class="redflag" title="Not MLR approved \u2014 click for detail">RED</button>`:""}<span class="t2">${esc(o.values)}</span>${snipWarn(o.values)}
+      <span class="txt"><span class="t1">${esc(o.header)}</span> ${o.red?badge(o):""}<span class="t2">${esc(o.values)}</span>${snipWarn(o.values)}
       ${o.on?scopeUI("snippets",i,o,camps):""}</span></div>`
   };
   [["sitelinks","#slBody"],["callouts","#coBody"],["snippets","#ssBody"]].forEach(([k, sel]) => {
@@ -915,36 +1126,78 @@ const HEAD = {
   Callouts:["Status","Campaign","Callout Text"],
   "Structured Snippets":["Status","Campaign","Structured snippet header","Structured snippet values"]
 };
+const FILL_RANK = {warn:1, dup:2, err:3};
 function mark(tab, rowIdx, colIdx, kind, note){
   const key = tab + "!" + rowIdx + "," + colIdx;
-  if(!S.fills[key] || kind === "err") S.fills[key] = {kind, note};
+  const cur = S.fills[key];
+  if(!cur || FILL_RANK[kind] >= FILL_RANK[cur.kind]) S.fills[key] = {kind, note};
 }
 function build(){
   const status = $("#dStatus").value, label = $("#dLabel").value.trim();
   const extStatus = $("#dExtStatus").value, snipStatus = $("#dSnippetStatus").value;
   const omit = $("#omitRed").checked;
   const out = {}; Object.keys(HEAD).forEach(k => out[k] = [HEAD[k].slice()]);
-  const issues = [], live = S.map.filter(m => m.on && m.matches.length), campaigns = [], urlAgg = {};
+  const issues = [], campaigns = [], urlAgg = {};
+  const live = S.map.filter(m => {
+    if(!m.on || !m.matches.length) return false;
+    if(omit && m.allRed){ issues.push({lvl:"info", t:`Skipped ${m.theme}: all ${m.count} keywords are not MLR approved, so the campaign would have no keywords.`}); return false; }
+    return true;
+  });
   S.fills = {};
 
   const byTheme = new Map();
   S.raw.keywords.forEach(k => { if(!byTheme.has(k.theme)) byTheme.set(k.theme, []); byTheme.get(k.theme).push(k); });
 
+  // only MLR-unapproved keywords are removed; anything else is a human decision
+
+  const log = [], seenRow = new Map(), dupGroups = new Set();
   live.forEach(m => {
     if(!campaigns.includes(m.campaign)) campaigns.push(m.campaign);
-    const rows = (byTheme.get(m.theme) || []).filter(k => !(omit && k.red));
+    // own theme first, then any themes borrowed into this campaign
+    const sources = [{theme:m.theme, base:m.base, own:true}].concat(
+      (m.extra || []).filter(t => t !== m.theme && byTheme.has(t)).map(t => ({theme:t, base:borrowBase(t, m), own:false})));
+    m._groups = [];
 
-    m.matches.forEach(match => {
-      const ag = adGroupName(m.base, match);
-      rows.forEach(k => {
-        if(k.mt && !new RegExp(k.mt.replace(/[^a-z]/gi,""), "i").test(match)) return;
-        const url = k.url || m.finalUrl;
-        const ri = out.Keywords.length;
-        out.Keywords.push([status, m.campaign, ag, k.kw, match, url, label]);
-        const up = urlProblem(url);
-        if(up){ mark("Keywords", ri, 5, "err", up); const gk = m.campaign + "|" + up; urlAgg[gk] = (urlAgg[gk]||0)+1; }
-        if(k.red && !omit) mark("Keywords", ri, 3, "warn", "Not MLR approved \u2014 marked red in the submission doc");
+    sources.forEach(src => {
+      const all = byTheme.get(src.theme) || [];
+      const srcMap = S.map.find(x => x.theme === src.theme);
+      const srcUrl = srcMap ? srcMap.finalUrl : "";
+      let kept = 0;
+      m.matches.forEach(match => {
+        const ag = adGroupName(src.base, match);
+        all.forEach(k => {
+          if(k.mt && !new RegExp(k.mt.replace(/[^a-z]/gi,""), "i").test(match)) return;
+          const key = k.theme + "|" + k.kw.toLowerCase();
+          const ov = S.kwOverride[key] || "";
+          let reason = "";
+          if(k.red) reason = k.why === "note" ? "Pending MLR note" : "Red fill";
+          let include = omit ? !reason : true;
+          if(ov === "exclude"){ include = false; if(!reason) reason = "Excluded manually"; }
+          if(ov === "include") include = true;
+          // borrowed keywords keep their original landing page
+          const url = k.url || (src.own ? m.finalUrl : srcUrl);
+          const rowKey = m.campaign + "|" + ag + "|" + k.kw.toLowerCase() + "|" + match;
+          const rec = {campaign:m.campaign, ag, theme:k.theme, kw:k.kw, match, url, reason, include, override:ov,
+                       borrowed:!src.own, urlProb:urlProblem(url), key, dup:false};
+          log.push(rec);
+          if(!rec.include) return;
+          kept++;
+          const ri = out.Keywords.length;
+          out.Keywords.push([status, m.campaign, ag, k.kw, match, url, label]);
+          // duplicates stay in the sheet; every copy is flagged so a person picks which to keep
+          if(seenRow.has(rowKey)){
+            rec.dup = true;
+            const first = seenRow.get(rowKey);
+            first.rec.dup = true;
+            dupGroups.add(rowKey);
+            mark("Keywords", ri, 3, "dup", "Duplicate row \u2014 this keyword, match type and ad group appear more than once. Pick which to keep.");
+            mark("Keywords", first.ri, 3, "dup", "Duplicate row \u2014 this keyword, match type and ad group appear more than once. Pick which to keep.");
+          } else seenRow.set(rowKey, {ri, rec});
+          if(rec.urlProb){ mark("Keywords", ri, 5, "err", rec.urlProb); const gk = m.campaign + "|" + rec.urlProb; urlAgg[gk] = (urlAgg[gk]||0)+1; }
+          if(reason && reason !== "Excluded manually") mark("Keywords", ri, 3, "warn", `Not MLR approved \u2014 ${reason.toLowerCase()}, included ${ov === "include" ? "by manual override" : "because the omit filter is off"}`);
+        });
       });
+      if(kept) m._groups.push({base:src.base, borrowed:!src.own, theme:src.theme});
     });
 
     const t = m.rsaTheme ? S.copy[m.rsaTheme] : null;
@@ -963,8 +1216,8 @@ function build(){
       const adUrlProblem = urlProblem(adUrl);
       if(adUrlProblem) issues.push({lvl:"err", t:`${adUrlProblem}: RSA final URL for ad "${m.rsaTheme}" in ${m.campaign}.`});
 
-      m.matches.forEach(match => {
-        const ag = adGroupName(m.base, match), ri = out.RSA.length;
+      m._groups.forEach(g => m.matches.forEach(match => {
+        const ag = adGroupName(g.base, match), ri = out.RSA.length;
         const row = [status, m.campaign, ag];
         row.push(hls[0] ? hls[0].text : "", pinPos);
         for(let i = 1; i < 15; i++) row.push(hls[i] ? hls[i].text : "");
@@ -983,7 +1236,7 @@ function build(){
         });
         [[m.path1,23,1],[m.path2,24,2]].forEach(([p, col, nth]) => { if(p && p.length > LIMITS.path){ mark("RSA", ri, col, "err", `Path ${nth} is ${p.length}/${LIMITS.path}`); issues.push({lvl:"err", t:`Ad "${m.rsaTheme}" in ${m.campaign} \u2014 path ${nth} is ${p.length}/${LIMITS.path}: "${p}"`}); } });
         if(adUrlProblem) mark("RSA", ri, 25, "err", adUrlProblem);
-      });
+      }));
     }
   });
 
@@ -1019,25 +1272,20 @@ function build(){
   const negs = $("#negList").value.split("\n").map(s => s.trim()).filter(Boolean), negMatch = $("#negMatch").value;
   negs.forEach(n => campaigns.forEach(c => out["Negative Kws"].push([c, "", n, negMatch])));
 
-  const seen = new Set(), kept = [out.Keywords[0]], remap = {};
-  let dup = 0;
-  for(let i = 1; i < out.Keywords.length; i++){
-    const r = out.Keywords[i], key = r[1]+"|"+r[2]+"|"+r[3].toLowerCase()+"|"+r[4];
-    if(seen.has(key)){ dup++; continue; }
-    seen.add(key); remap[i] = kept.length; kept.push(r);
-  }
-  const nf = {};
-  Object.keys(S.fills).forEach(k => {
-    const [tab, rc] = k.split("!"); const [r, c] = rc.split(",").map(Number);
-    if(tab !== "Keywords"){ nf[k] = S.fills[k]; return; }
-    if(remap[r] !== undefined) nf[`Keywords!${remap[r]},${c}`] = S.fills[k];
-  });
-  S.fills = nf;
-  out.Keywords = kept;
-  if(dup) issues.push({lvl:"warn", t:`${dup} duplicate keyword row(s) removed.`});
+  const dup = log.filter(r => r.dup).length;
+  if(dup) issues.push({lvl:"warn", t:`${dup} duplicate row(s) across ${dupGroups.size} keyword(s) kept in the export and shaded orange. Nothing was removed \u2014 choose which copy to keep before importing. See the Keywords step, "Duplicates".`});
 
-  const omittedKw = omit ? S.raw.keywords.filter(k => k.red && live.some(m => m.theme === k.theme)).length : 0;
-  if(omittedKw) issues.push({lvl:"info", t:`${omittedKw} red keyword(s) excluded from selected campaigns.`});
+  // same keyword + match type live in more than one campaign = self-competition
+  const where = {};
+  log.filter(r => r.include).forEach(r => { const k = r.kw.toLowerCase() + "|" + r.match; (where[k] = where[k] || new Set()).add(r.campaign); });
+  const overlap = {};
+  Object.keys(where).forEach(k => { if(where[k].size > 1) where[k].forEach(c => overlap[c] = (overlap[c]||0) + 1); });
+  const ovCamps = Object.keys(overlap);
+  if(ovCamps.length) issues.push({lvl:"info", t:`${Object.keys(where).filter(k => where[k].size > 1).length} keyword/match pairs run in more than one campaign and will compete in the same auctions. Most overlap: ${ovCamps.sort((a,b)=>overlap[b]-overlap[a]).slice(0,3).map(c=>`${c} (${overlap[c]})`).join(", ")}.`});
+  S.kwLog = log; S.overlap = overlap;
+
+  const omittedKw = new Set(log.filter(r => !r.include && !r.dup).map(r => r.campaign + "|" + r.key)).size;
+  if(omittedKw) issues.push({lvl:"info", t:`${omittedKw} keyword(s) excluded from selected campaigns \u2014 see the Keywords step for each one and why.`});
 
   S.out = out; S.issues = issues; S.campaigns = campaigns;
 }
@@ -1071,7 +1319,7 @@ function drawPreview(k){
   $("#prevWrap").innerHTML = `<table><thead><tr>${head.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${
     body.map((r, ri) => `<tr>${head.map((_, ci) => {
       const f = S.fills[`${k}!${ri+1},${ci}`];
-      const st = f ? `background:${f.kind==="err"?"#f8c9c4":"#ffe08a"};color:#3a1f1c;` : "";
+      const st = f ? `background:${f.kind==="err"?"#f8c9c4":f.kind==="dup"?"#ffc000":"#ffe08a"};color:#3a1f1c;` : "";
       const tt = f ? ` title="${esc(f.note)}"` : "";
       return `<td class="mono" style="${st}"${tt}>${esc(String(r[ci]==null?"":r[ci]).slice(0,60))}</td>`;
     }).join("")}</tr>`).join("")}</tbody></table>`;
@@ -1096,7 +1344,7 @@ $("#dl").addEventListener("click", async () => {
           const f = S.fills[`${name}!${r},${c}`];
           if(!f) continue;
           const cell = ws.getCell(r + 1, c + 1);
-          cell.fill = {type:"pattern", pattern:"solid", fgColor:{argb: f.kind === "err" ? FILL_ERR : FILL_WARN}};
+          cell.fill = {type:"pattern", pattern:"solid", fgColor:{argb: f.kind === "err" ? FILL_ERR : f.kind === "dup" ? FILL_DUP : FILL_WARN}};
           if(f.note) cell.note = f.note;
         }
       }
@@ -1124,12 +1372,33 @@ $("#cePrev").addEventListener("click", () => stepAd(-1));
 $("#ceNext").addEventListener("click", () => stepAd(1));
 
 /* clickable RED badges explain what red means */
+function badge(o){
+  const t = o && o.why === "note" ? "PENDING MLR" : "RED";
+  return `<button type="button" class="redflag" title="Not MLR approved \u2014 click for detail">${t}</button>`;
+}
+function showModal(html){
+  const bd = document.createElement("div");
+  bd.className = "modal-bd";
+  bd.innerHTML = `<div class="modal" role="dialog" aria-modal="true">${html}
+    <button class="btn primary" data-close>Got it</button></div>`;
+  const close = () => bd.remove();
+  bd.addEventListener("click", e => { if(e.target === bd || e.target.hasAttribute("data-close")) close(); });
+  document.addEventListener("keydown", function k(e){ if(e.key === "Escape"){ close(); document.removeEventListener("keydown", k); } });
+  document.body.appendChild(bd);
+}
+function explainBorrow(){
+  showModal(`<h3>Also pull keywords from</h3>
+    <p>This adds another theme's keywords to this campaign <b>in addition to</b> the keywords it already has. Nothing is moved or reassigned.</p>
+    <p>The borrowed set keeps running in its own campaign too, gets its own ad groups here (named after its own theme), keeps its original landing pages, and runs this campaign's ad.</p>
+    <p>Because the same keyword then lives in two campaigns, they compete in the same auctions. The Keywords step shows an overlap count per campaign so you can see how much.</p>`);
+}
 function explainRed(){
   const bd = document.createElement("div");
   bd.className = "modal-bd";
   bd.innerHTML = `<div class="modal" role="dialog" aria-modal="true">
     <h3>Marked red in the submission doc</h3>
-    <p>This asset is <b>not MLR approved</b>. Red fill in the submission document means the copy never cleared medical, legal and regulatory review, so it isn't cleared to run.</p>
+    <p>This asset is <b>not MLR approved</b>. It hasn't cleared medical, legal and regulatory review, so it isn't cleared to run.</p>
+    <p><b>RED</b> means the cell is filled red in the submission doc. <b>PENDING MLR</b> means a note on that row says approval is still pending (for example "pending MLR approval").</p>
     <p>By default every red asset is excluded from the export. You can override that on the Defaults step, and anything you include anyway is shaded amber in the exported file so it can be caught before upload.</p>
     <button class="btn primary" data-close>Got it</button></div>`;
   const close = () => bd.remove();
@@ -1138,12 +1407,13 @@ function explainRed(){
   document.body.appendChild(bd);
 }
 document.addEventListener("click", e => {
-  const t = e.target.closest && e.target.closest(".redflag");
-  if(t){ e.preventDefault(); explainRed(); }
+  if(!e.target.closest) return;
+  if(e.target.closest(".redflag")){ e.preventDefault(); explainRed(); return; }
+  if(e.target.closest("#borrowInfo")){ e.preventDefault(); explainBorrow(); }
 });
 
 loadLocal(); syncDefChips();
-["#tpl","#tplYear","#agTpl","#stripParens"].forEach(s => $(s).addEventListener("change", () => { if(S.map.length) reapplyTemplate(); }));
+["#tpl","#tplYear","#agTpl","#stripParens","#brand"].forEach(s => $(s).addEventListener("change", () => { if(S.map.length) reapplyTemplate(); }));
 </script>
 </body>
 </html>
