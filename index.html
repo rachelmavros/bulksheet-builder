@@ -148,6 +148,15 @@ code.k{font-family:"IBM Plex Mono",monospace;background:var(--rule-2);padding:1p
 .camplist label{display:flex;gap:7px;align-items:flex-start;font-size:12px;font-family:"IBM Plex Mono",monospace;color:var(--ink-2)}
 .infoq{appearance:none;width:15px;height:15px;border-radius:50%;border:1px solid var(--ink-3);background:none;color:var(--ink-3);font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;line-height:1;cursor:pointer;padding:0;vertical-align:1px}
 .infoq:hover{background:var(--ink-blue);border-color:var(--ink-blue);color:#fff}
+.stack{display:flex;flex-direction:column;gap:4px}
+.slot{display:flex;gap:4px;align-items:center}
+.slot select{flex:1;min-width:0}
+.slot .rm{appearance:none;border:0;background:none;color:var(--ink-3);cursor:pointer;font-size:15px;line-height:1;padding:0 2px;flex:none}
+.slot .rm:hover{color:var(--err)}
+.slot .pad{width:15px;flex:none}
+.addlink{appearance:none;border:0;background:none;padding:2px 0;margin:0 auto;display:block;font:inherit;font-size:12px;color:var(--ink-blue);cursor:pointer;text-align:center}
+.addlink:hover{text-decoration:underline}
+.fixedslot{flex:1;min-width:0;font-size:13px;color:var(--ink-2);border:1px solid transparent;padding:5px 7px;background:var(--rule-2);border-radius:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .borrow{display:flex;flex-wrap:wrap;gap:4px}
 .bchip{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;background:var(--rule-2);color:var(--ink-2);border-radius:3px;padding:2px 3px 2px 7px}
 .bchip button{appearance:none;border:0;background:none;color:var(--ink-3);cursor:pointer;font-size:14px;line-height:1;padding:0 3px}
@@ -279,7 +288,7 @@ code.k{font-family:"IBM Plex Mono",monospace;background:var(--rule-2);padding:1p
         <thead><tr>
           <th style="width:30px"></th><th>Keyword theme</th><th style="width:70px" class="mono">Kws</th>
           <th style="width:250px">Campaign name</th><th style="width:170px">Ad group name</th>
-          <th style="width:150px">Match types</th><th style="width:170px">RSA copy</th>
+          <th style="width:150px">Match types</th><th style="width:210px">Ads <button type="button" class="infoq" id="adsInfo" title="What does this do?">i</button></th>
           <th style="width:90px">Path 1</th><th style="width:90px">Path 2</th>
           <th style="width:230px">Also pull keywords from <button type="button" class="infoq" id="borrowInfo" title="What does this do?">i</button></th>
         </tr></thead><tbody></tbody></table></div>
@@ -593,10 +602,11 @@ function parseWorkbook(wb, fname){
   } else errs.push("No Keywords tab found.");
 
   /* rsa */
-  const rsaS = sheetOf(wb, n => n.includes("responsive") || n.includes("rsa") || n.includes("ad copy"));
+  const rsaS = sheetOf(wb, n => (n.includes("responsive") || n.includes("rsa") || n.includes("ad copy") || /\bads?\b/.test(n))
+    && !n.includes("extension") && !n.includes("keyword") && !n.includes("instruction") && !n.includes("reference"));
   const rsa = {};
   if(rsaS){
-    const h = findHeader(rsaS.grid, {anchor:["campaign theme","keyword theme","ad theme","ad group theme","ad name","theme"], hl:["available headline","headline"], hlPin:["pin to headline"], de:["available description","description line"], dePin:["pin to description"], du:["display url","display text"]});
+    const h = findHeader(rsaS.grid, {anchor:["campaign theme","keyword theme","ad theme","ad group theme","product / message","product/message","ad name","message","product","theme"], hl:["available headline","headline"], hlPin:["pin to headline"], de:["available description","description line"], dePin:["pin to description"], du:["display url","display text"], fu:["final destination url","final url","destination url","landing page"]});
     if(h){
       const c = h.cols;
       for(let r = h.row + 1; r < rsaS.grid.length; r++){
@@ -606,7 +616,8 @@ function parseWorkbook(wb, fname){
         // repeated header rows inside the tab ("Keyword Theme" / "Available Headlines ...")
         if(/theme$/i.test(theme) || /available headline/i.test(clean(row[c.hl]))) continue;
         const pend = rowPending(row);
-        const t = rsa[theme] || (rsa[theme] = {headlines:[], descriptions:[], urls:[]});
+        const t = rsa[theme] || (rsa[theme] = {headlines:[], descriptions:[], urls:[], finals:[]});
+        if(c.fu !== undefined){ const f = clean(row[c.fu]); if(f && !isFormula(f) && !/final|destination/i.test(f)) t.finals.push(f); }
         const hv = c.hl !== undefined ? clean(row[c.hl]) : "";
         if(hv && !isFormula(hv) && !/^\(character limit/i.test(hv)){
           const fr = cellRed(rsaS, r, c.hl), red = fr || pend; if(red) S.redCount.hl++;
@@ -643,6 +654,13 @@ function parseWorkbook(wb, fname){
       }
     }
     anchors.sort((a,b) => a.r - b.r);
+    let extHadFlags = false;
+    const finishSnippets = a => {
+      if(a.kind !== "snippets" || !a.vals || !a.vals.length) return;
+      // the doc lists snippet values without a header type: one set, header chosen in the app
+      ext.snippets.push({on:true, red:a.vals.every(v => v.red), why:"fill", scope:"all", camps:[],
+        header:"", values:a.vals.filter(v => !v.red).map(v => v.text).join(", "), needHeader:true});
+    };
     anchors.forEach((a, i) => {
       const end = i + 1 < anchors.length ? anchors[i+1].r : g.length;
       for(let r = a.r + 1; r < end; r++){
@@ -654,14 +672,17 @@ function parseWorkbook(wb, fname){
         const red = cellRed(exS, r, a.c) || pend;
         if(red) S.redCount.ext++;
         const preset = !!flag && flag.length <= 3 && (a.c + exS.off.c) !== 0 && !red;
+        if(preset) extHadFlags = true;
         const base = {on:preset, red, why: cellRed(exS, r, a.c) ? "fill" : "note", scope:"all", camps:[]};
         if(a.kind === "sitelinks") ext.sitelinks.push(Object.assign(base, {text:main, d1:a.cols.d1!==undefined?clean(row[a.cols.d1]):"", d2:a.cols.d2!==undefined?clean(row[a.cols.d2]):"", url:a.cols.url!==undefined?clean(row[a.cols.url]):""}));
         else if(a.kind === "callouts") ext.callouts.push(Object.assign(base, {text:main}));
-        else ext.snippets.push(Object.assign(base, {header:main, values:a.cols.val!==undefined?clean(row[a.cols.val]):""}));
+        else if(a.cols.val !== undefined) ext.snippets.push(Object.assign(base, {header:main, values:clean(row[a.cols.val])}));
+        else { (a.vals = a.vals || []).push({text:main, red}); a.anyOn = a.anyOn || preset; }
       }
+      finishSnippets(a);
     });
     const allExt = ext.sitelinks.concat(ext.callouts, ext.snippets);
-    if(allExt.length && !allExt.some(o => o.on)){
+    if(allExt.length && !extHadFlags){
       allExt.forEach(o => { o.on = !o.red; });
       notes.push(`No selection marks in column A, so every approved extension starts selected.`);
     }
@@ -711,7 +732,8 @@ function buildCopy(){
     S.copy[theme] = {
       headlines: t.headlines.map(h => ({text:h.text, pin:h.pin, red:h.red, why:h.why, on:!h.red})),
       descriptions: t.descriptions.map(d => ({text:d.text, pin:d.pin, red:d.red, why:d.why, on:!d.red})),
-      urls: t.urls.slice()
+      urls: t.urls.slice(),
+      finals: (t.finals || []).slice()
     };
   }
 }
@@ -766,11 +788,11 @@ function adGroupName(base, match){
     .replace(/\{match type\}/gi, match).replace(/\{match\}/gi, match)
     .replace(/\{theme\}/gi, base).replace(/\{base\}/gi, base).trim();
 }
-function guessRsa(theme, msg){
+function guessRsa(theme, msg, strict){
   const names = Object.keys(S.raw.rsa);
   if(!names.length) return "";
   const norm = s => s.toLowerCase().replace(/[\u00ae\u2122]/g,"").replace(/[^a-z0-9 ]/g," ").replace(/\b(ad|ads|campaign|theme|copy)\b/g," ").replace(/\s+/g," ").trim();
-  const cands = [msg, baseName(theme), theme].filter(Boolean).map(norm);
+  const cands = (strict ? [msg] : [msg, baseName(theme), theme]).filter(Boolean).map(norm);
   let best = "", bs = 0;
   for(const n of names){
     const nn = norm(n);
@@ -808,12 +830,17 @@ function buildMap(){
   S.map = Array.from(byTheme.entries()).map(([theme, rows]) => {
     const mc = {}; rows.forEach(r => { if(r.msg) mc[r.msg] = (mc[r.msg]||0)+1; });
     const msg = Object.keys(mc).sort((a,b) => mc[b]-mc[a])[0] || "";
-    const rsaTheme = guessRsa(theme, msg), p = pathsFrom(rsaTheme);
+    const parts = msg.split(/\s*\/\s*|\s+\bor\b\s+/i).map(x => x.trim()).filter(Boolean);
+    const guesses = (parts.length > 1
+      ? parts.map(x => guessRsa(theme, x, true))          // each named ad on its own merits
+      : [guessRsa(theme, msg)]).filter((x, i, a) => x && a.indexOf(x) === i);
+    const rsaTheme = guesses[0] || guessRsa(theme, msg), p = pathsFrom(rsaTheme);
+    const multi = parts.length > 1;
     const allRed = rows.length > 0 && rows.every(r => r.red);
-    return {theme, count:rows.length, red:rows.filter(r => r.red).length, msg, allRed,
+    return {theme, count:rows.length, red:rows.filter(r => r.red).length, msg, allRed, multi,
       on: !/tbd|not currently supporting|n\/a/i.test(msg) && !(allRed && $("#omitRed").checked),
       campaign:campaignName(theme), base:baseName(theme), matches:S.defMatch.slice(),
-      rsaTheme, path1:p[0], path2:p[1], finalUrl:modeURL(rows.filter(r=>!r.red).map(r=>r.url))};
+      rsaTheme, extraAds: guesses.slice(1, 3), path1:p[0], path2:p[1], finalUrl:modeURL(rows.filter(r=>!r.red).map(r=>r.url))};
   });
 }
 function reapplyTemplate(){ S.map.forEach(m => { m.campaign = campaignName(m.theme); m.base = baseName(m.theme); }); renderMap(); }
@@ -827,33 +854,74 @@ $$("#defMatch .chip").forEach(c => c.addEventListener("click", () => {
   syncDefChips(); S.map.forEach(r => r.matches = S.defMatch.slice());
 }));
 
+function slotRow(inner, rmAttrs){
+  return `<div class="slot">${inner}${rmAttrs ? `<button type="button" class="rm" ${rmAttrs} title="remove">&times;</button>` : `<span class="pad"></span>`}</div>`;
+}
+function adCell(m, i, names){
+  const extras = m.extraAds || [];
+  const used = [m.rsaTheme].concat(extras).filter(Boolean);
+  const opts = (sel, exclude) => `<option value="">&mdash; no ad &mdash;</option>` +
+    names.filter(n => n === sel || !exclude.includes(n)).map(n => `<option ${n === sel ? "selected" : ""}>${esc(n)}</option>`).join("");
+  let h = `<div class="stack">`;
+  h += slotRow(`<select data-i="${i}" data-f="rsaTheme">${opts(m.rsaTheme, used)}</select>`, "");
+  extras.forEach(t => { h += slotRow(`<select data-adslot="${i}" data-t="${esc(t)}">${opts(t, used)}</select>`, `data-unad="${i}" data-t="${esc(t)}"`); });
+  if(m._addAd) h += slotRow(`<select data-addad="${i}" autofocus><option value="">&mdash; choose an ad &mdash;</option>${names.filter(n => !used.includes(n)).map(n => `<option>${esc(n)}</option>`).join("")}</select>`, `data-canceladd="${i}"`);
+  h += `</div>`;
+  if(used.length >= 3) h += `<div class="addlink" style="color:var(--ink-3);cursor:default">3 ad limit reached</div>`;
+  else if(!m._addAd) h += `<button type="button" class="addlink" data-showad="${i}">+ also run ad&hellip;</button>`;
+  return h;
+}
+function kwCell(m, i){
+  const extra = m.extra || [];
+  const pool = S.map.filter(x => x.theme !== m.theme && !extra.includes(x.theme));
+  let h = `<div class="stack">`;
+  h += slotRow(`<span class="fixedslot" title="${esc(m.theme)}">${esc(m.theme)}</span>`, "");
+  extra.forEach(t => { h += slotRow(`<span class="fixedslot" title="${esc(t)}">${esc(t)}</span>`, `data-unborrow="${i}" data-t="${esc(t)}"`); });
+  if(m._addKw) h += slotRow(`<select data-borrow="${i}" autofocus><option value="">&mdash; choose a keyword set &mdash;</option>${pool.map(x => `<option>${esc(x.theme)}</option>`).join("")}</select>`, `data-cancelkw="${i}"`);
+  h += `</div>`;
+  if(!m._addKw && pool.length) h += `<button type="button" class="addlink" data-showkw="${i}">+ add keyword set&hellip;</button>`;
+  return h;
+}
 function renderMap(){
   const tb = $("#mapTable tbody"), rsaNames = Object.keys(S.raw.rsa);
   const omit = $("#omitRed").checked;
   tb.innerHTML = S.map.map((m, i) => `
     <tr class="${m.on?"":"off"}">
       <td><input type="checkbox" data-i="${i}" data-f="on" ${m.on?"checked":""}></td>
-      <td><div>${esc(m.theme)}${m.allRed?` ${badge({why:"fill"})} <span style="font-size:11.5px;color:var(--err)">every keyword unapproved</span>`:""}</div>${m.msg?`<div style="font-size:11.5px;color:var(--ink-3)">${esc(m.msg)}</div>`:""}</td>
+      <td><div>${esc(m.theme)}${m.multi?` <span class="tag" title="The submission doc names more than one ad for this theme; all are mapped to rotate.">multiple ads</span>`:""}${m.allRed?` ${badge({why:"fill"})} <span style="font-size:11.5px;color:var(--err)">every keyword unapproved</span>`:""}</div>${m.msg?`<div style="font-size:11.5px;color:var(--ink-3)">${esc(m.msg)}</div>`:""}</td>
       <td class="mono">${omit && m.red ? (m.count-m.red)+` <button type="button" class="redflag" title="Not MLR approved \u2014 click for detail">-${m.red}</button>` : m.count}</td>
       <td><input type="text" class="mono" data-i="${i}" data-f="campaign" value="${esc(m.campaign)}"></td>
       <td><input type="text" data-i="${i}" data-f="base" value="${esc(m.base)}"></td>
       <td><div class="chips">${MATCHES.map(x=>`<button class="chip" data-i="${i}" data-m="${x}" aria-pressed="${m.matches.includes(x)}">${x.slice(0,2)}</button>`).join("")}</div></td>
-      <td><select data-i="${i}" data-f="rsaTheme"><option value="">&mdash; no ad &mdash;</option>${rsaNames.map(n=>`<option ${n===m.rsaTheme?"selected":""}>${esc(n)}</option>`).join("")}</select></td>
+      <td>${adCell(m, i, rsaNames)}</td>
       <td><input type="text" data-i="${i}" data-f="path1" value="${esc(m.path1)}" maxlength="15"></td>
       <td><input type="text" data-i="${i}" data-f="path2" value="${esc(m.path2)}" maxlength="15"></td>
-      <td>
-        <div class="borrow">${(m.extra||[]).map(t => `<span class="bchip">${esc(t)}<button type="button" data-unborrow="${i}" data-t="${esc(t)}" title="remove">&times;</button></span>`).join("")}</div>
-        <select data-borrow="${i}" style="margin-top:4px"><option value="">+ add keyword set&hellip;</option>${S.map.filter(x => x.theme !== m.theme && !(m.extra||[]).includes(x.theme)).map(x => `<option>${esc(x.theme)}</option>`).join("")}</select>
-      </td>
+      <td>${kwCell(m, i)}</td>
     </tr>`).join("");
   tb.querySelectorAll("input,select").forEach(el => el.addEventListener("change", e => {
     const i = +e.target.dataset.i, f = e.target.dataset.f; if(!f) return;
     S.map[i][f] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
     if(f === "on") e.target.closest("tr").classList.toggle("off", !e.target.checked);
   }));
+  tb.querySelectorAll("[data-showad]").forEach(b => b.addEventListener("click", () => { S.map[+b.dataset.showad]._addAd = true; renderMap(); }));
+  tb.querySelectorAll("[data-showkw]").forEach(b => b.addEventListener("click", () => { S.map[+b.dataset.showkw]._addKw = true; renderMap(); }));
+  tb.querySelectorAll("[data-canceladd]").forEach(b => b.addEventListener("click", () => { S.map[+b.dataset.canceladd]._addAd = false; renderMap(); }));
+  tb.querySelectorAll("[data-cancelkw]").forEach(b => b.addEventListener("click", () => { S.map[+b.dataset.cancelkw]._addKw = false; renderMap(); }));
+  tb.querySelectorAll("select[data-adslot]").forEach(sel => sel.addEventListener("change", e => {
+    const i = +e.target.dataset.adslot, was = e.target.dataset.t, now = e.target.value;
+    S.map[i].extraAds = (S.map[i].extraAds || []).map(x => x === was ? now : x).filter(Boolean);
+    renderMap();
+  }));
+  tb.querySelectorAll("select[data-addad]").forEach(sel => sel.addEventListener("change", e => {
+    const i = +e.target.dataset.addad, t = e.target.value; if(!t) return;
+    S.map[i].extraAds = (S.map[i].extraAds || []).concat([t]); S.map[i]._addAd = false; renderMap();
+  }));
+  tb.querySelectorAll("[data-unad]").forEach(b => b.addEventListener("click", () => {
+    const i = +b.dataset.unad; S.map[i].extraAds = (S.map[i].extraAds || []).filter(x => x !== b.dataset.t); renderMap();
+  }));
   tb.querySelectorAll("select[data-borrow]").forEach(sel => sel.addEventListener("change", e => {
     const i = +e.target.dataset.borrow, t = e.target.value; if(!t) return;
-    S.map[i].extra = (S.map[i].extra || []).concat([t]); renderMap();
+    S.map[i].extra = (S.map[i].extra || []).concat([t]); S.map[i]._addKw = false; renderMap();
   }));
   tb.querySelectorAll("[data-unborrow]").forEach(b => b.addEventListener("click", () => {
     const i = +b.dataset.unborrow; S.map[i].extra = (S.map[i].extra || []).filter(x => x !== b.dataset.t); renderMap();
@@ -863,10 +931,12 @@ function renderMap(){
     row.matches = row.matches.includes(m) ? row.matches.filter(x => x !== m) : MATCHES.filter(x => row.matches.includes(x) || x === m);
     c.setAttribute("aria-pressed", row.matches.includes(m));
   }));
+  let notes = "";
+  const multi = S.map.filter(m => m.on && m.multi);
+  if(multi.length) notes += `<div class="note">${multi.length} theme${multi.length>1?"s name":" names"} more than one ad in the submission doc. Each named ad is mapped and will rotate in the same ad groups &mdash; confirm: ${multi.map(m => `${esc(m.theme)} (${esc(m.msg)})`).join("; ")}.</div>`;
   const noAd = S.map.filter(m => m.on && !m.rsaTheme);
   const dup = {}; S.map.filter(m => m.on).forEach(m => dup[m.campaign] = (dup[m.campaign]||0)+1);
   const dupNames = Object.keys(dup).filter(k => dup[k] > 1);
-  let notes = "";
   if(noAd.length) notes += `<div class="note warn">${noAd.length} selected theme${noAd.length>1?"s have":" has"} no RSA copy matched, so no ad rows will be written: ${noAd.map(m=>esc(m.theme)).join(", ")}.</div>`;
   if(dupNames.length) notes += `<div class="note" style="margin-top:8px">${dupNames.length} campaign name${dupNames.length>1?"s are":" is"} shared by more than one theme, so their keywords merge into one campaign: ${dupNames.map(esc).join(", ")}.</div>`;
   const borrowing = S.map.filter(m => m.on && (m.extra||[]).length);
@@ -1076,7 +1146,12 @@ function renderExt(){
       <span class="txt"><span class="t1">${esc(o.text)}</span> ${lim(o.text,LIMITS.callout)} ${o.red?badge(o):""}
       ${o.on?scopeUI("callouts",i,o,camps):""}</span></div>`,
     snippets:(o,i)=>`<div class="sl-row"><input type="checkbox" data-k="snippets" data-i="${i}" ${o.on?"checked":""}>
-      <span class="txt"><span class="t1">${esc(o.header)}</span> ${o.red?badge(o):""}<span class="t2">${esc(o.values)}</span>${snipWarn(o.values)}
+      <span class="txt">${o.needHeader
+        ? `<span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="t1">Header type</span>
+            <select data-snhead="${i}" style="width:auto">${["","Amenities","Brands","Courses","Degree programs","Destinations","Featured hotels","Insurance coverage","Models","Neighborhoods","Service catalog","Shows","Styles","Types"].map(v=>`<option value="${esc(v)}" ${o.header===v?"selected":""}>${v||"\u2014 choose \u2014"}</option>`).join("")}</select>
+            ${o.header?"":`<span class="tag err">required</span>`}</span>
+           <span class="t2" style="margin-top:4px;display:block">The doc lists values with no header type, so pick one.</span>`
+        : `<span class="t1">${esc(o.header)}</span>`} ${o.red?badge(o):""}<span class="t2">${esc(o.values)}</span>${snipWarn(o.values)}
       ${o.on?scopeUI("snippets",i,o,camps):""}</span></div>`
   };
   [["sitelinks","#slBody"],["callouts","#coBody"],["snippets","#ssBody"]].forEach(([k, sel]) => {
@@ -1091,6 +1166,9 @@ function renderExt(){
     o.scope = e.target.value;
     if(o.scope === "some" && !o.camps.length) o.camps = [];
     renderExt();
+  }));
+  $$("select[data-snhead]").forEach(el => el.addEventListener("change", e => {
+    S.ext.snippets[+e.target.dataset.snhead].header = e.target.value; renderExt();
   }));
   $$("input[data-sk]").forEach(el => el.addEventListener("change", e => {
     const o = S.ext[e.target.dataset.sk][+e.target.dataset.si], v = e.target.value;
@@ -1200,21 +1278,25 @@ function build(){
       if(kept) m._groups.push({base:src.base, borrowed:!src.own, theme:src.theme});
     });
 
-    const t = m.rsaTheme ? S.copy[m.rsaTheme] : null;
+    const adList = [m.rsaTheme].concat(m.extraAds || []).filter((x, i, arr) => x && arr.indexOf(x) === i);
+    if(adList.length > 3) issues.push({lvl:"warn", t:`${m.campaign} maps ${adList.length} ads to each ad group. Google allows 3 responsive search ads per ad group, so the extras will be rejected on import.`});
+    adList.forEach(adName => {
+    const t = S.copy[adName];
     if(t){
       const hlAll = t.headlines.filter(h => h.on && h.text.trim());
       const deAll = t.descriptions.filter(d => d.on && d.text.trim());
       const ord = a => { const i = a.findIndex(x => String(x.pin).trim() === "1"); if(i > 0){ const [p] = a.splice(i,1); a.unshift(p); } return a; };
       const hls = ord(hlAll.slice()), des = ord(deAll.slice());
       const pinPos = hls[0] && String(hls[0].pin).trim() === "1" ? "1" : "";
-      hls.slice(1).forEach(h => { if(/^[123]$/.test(String(h.pin).trim())) issues.push({lvl:"warn", t:`${m.rsaTheme}: "${h.text}" is pinned to ${h.pin}; this sheet layout only carries a pin for headline 1. Set it in Editor after import.`}); });
-      if(hls.length < 3) issues.push({lvl:"err", t:`${m.rsaTheme}: only ${hls.length} headline(s) enabled. Editor requires 3.`});
-      if(des.length < 2) issues.push({lvl:"err", t:`${m.rsaTheme}: only ${des.length} description(s) enabled. Editor requires 2.`});
-      if(hls.length > 15) issues.push({lvl:"warn", t:`${m.rsaTheme}: ${hls.length} headlines enabled; only the first 15 are written.`});
-      if(des.length > 4) issues.push({lvl:"warn", t:`${m.rsaTheme}: ${des.length} descriptions enabled; only the first 4 are written.`});
-      const adUrl = m.finalUrl;
+      hls.slice(1).forEach(h => { if(/^[123]$/.test(String(h.pin).trim())) issues.push({lvl:"warn", t:`${adName}: "${h.text}" is pinned to ${h.pin}; this sheet layout only carries a pin for headline 1. Set it in Editor after import.`}); });
+      if(hls.length < 3) issues.push({lvl:"err", t:`${adName}: only ${hls.length} headline(s) enabled. Editor requires 3.`});
+      if(des.length < 2) issues.push({lvl:"err", t:`${adName}: only ${des.length} description(s) enabled. Editor requires 2.`});
+      if(hls.length > 15) issues.push({lvl:"warn", t:`${adName}: ${hls.length} headlines enabled; only the first 15 are written.`});
+      if(des.length > 4) issues.push({lvl:"warn", t:`${adName}: ${des.length} descriptions enabled; only the first 4 are written.`});
+      const tf = (t && t.finals && t.finals.length) ? modeURL(t.finals) : "";
+      const adUrl = tf || m.finalUrl;
       const adUrlProblem = urlProblem(adUrl);
-      if(adUrlProblem) issues.push({lvl:"err", t:`${adUrlProblem}: RSA final URL for ad "${m.rsaTheme}" in ${m.campaign}.`});
+      if(adUrlProblem) issues.push({lvl:"err", t:`${adUrlProblem}: RSA final URL for ad "${adName}" in ${m.campaign}.`});
 
       m._groups.forEach(g => m.matches.forEach(match => {
         const ag = adGroupName(g.base, match), ri = out.RSA.length;
@@ -1226,18 +1308,19 @@ function build(){
         out.RSA.push(row);
         hls.slice(0,15).forEach((h, i) => {
           const col = i === 0 ? 3 : i + 4;
-          if(h.text.length > LIMITS.headline){ mark("RSA", ri, col, "err", `Headline ${i+1} is ${h.text.length}/${LIMITS.headline} characters`); issues.push({lvl:"err", t:`Ad "${m.rsaTheme}" \u2014 headline ${i+1} is ${h.text.length}/${LIMITS.headline}: "${h.text}"`}); }
+          if(h.text.length > LIMITS.headline){ mark("RSA", ri, col, "err", `Headline ${i+1} is ${h.text.length}/${LIMITS.headline} characters`); issues.push({lvl:"err", t:`Ad "${adName}" \u2014 headline ${i+1} is ${h.text.length}/${LIMITS.headline}: "${h.text}"`}); }
           else if(h.red && !omit) mark("RSA", ri, col, "warn", "Not MLR approved \u2014 marked red in the submission doc");
         });
         des.slice(0,4).forEach((d, i) => {
           const col = 19 + i;
-          if(d.text.length > LIMITS.description){ mark("RSA", ri, col, "err", `Description ${i+1} is ${d.text.length}/${LIMITS.description} characters`); issues.push({lvl:"err", t:`Ad "${m.rsaTheme}" \u2014 description ${i+1} is ${d.text.length}/${LIMITS.description}: "${d.text}"`}); }
+          if(d.text.length > LIMITS.description){ mark("RSA", ri, col, "err", `Description ${i+1} is ${d.text.length}/${LIMITS.description} characters`); issues.push({lvl:"err", t:`Ad "${adName}" \u2014 description ${i+1} is ${d.text.length}/${LIMITS.description}: "${d.text}"`}); }
           else if(d.red && !omit) mark("RSA", ri, col, "warn", "Not MLR approved \u2014 marked red in the submission doc");
         });
-        [[m.path1,23,1],[m.path2,24,2]].forEach(([p, col, nth]) => { if(p && p.length > LIMITS.path){ mark("RSA", ri, col, "err", `Path ${nth} is ${p.length}/${LIMITS.path}`); issues.push({lvl:"err", t:`Ad "${m.rsaTheme}" in ${m.campaign} \u2014 path ${nth} is ${p.length}/${LIMITS.path}: "${p}"`}); } });
+        [[m.path1,23,1],[m.path2,24,2]].forEach(([p, col, nth]) => { if(p && p.length > LIMITS.path){ mark("RSA", ri, col, "err", `Path ${nth} is ${p.length}/${LIMITS.path}`); issues.push({lvl:"err", t:`Ad "${adName}" in ${m.campaign} \u2014 path ${nth} is ${p.length}/${LIMITS.path}: "${p}"`}); } });
         if(adUrlProblem) mark("RSA", ri, 25, "err", adUrlProblem);
       }));
     }
+    });
   });
 
   const targets = o => o.scope === "all" ? campaigns : campaigns.filter(c => o.camps.includes(c));
@@ -1259,6 +1342,7 @@ function build(){
   S.ext.snippets.filter(o => o.on).forEach(o => targets(o).forEach(c => {
     const ri = out["Structured Snippets"].length;
     out["Structured Snippets"].push([snipStatus, c, o.header, o.values]);
+    if(!o.header){ mark("Structured Snippets", ri, 2, "err", "No snippet header type chosen"); issues.push({lvl:"err", t:`Structured snippet has no header type. Pick one on the Extensions step.`}); }
     const over = (o.values||"").split(",").map(s=>s.trim()).filter(s=>s.length>LIMITS.snippetValue);
     if(over.length){ mark("Structured Snippets", ri, 3, "err", `${over.length} value(s) over ${LIMITS.snippetValue}`); issues.push({lvl:"err", t:`Snippet value over ${LIMITS.snippetValue}: "${over[0]}"`}); }
     else if(o.red && !omit) mark("Structured Snippets", ri, 2, "warn", "Not MLR approved \u2014 marked red in the submission doc");
@@ -1386,6 +1470,12 @@ function showModal(html){
   document.addEventListener("keydown", function k(e){ if(e.key === "Escape"){ close(); document.removeEventListener("keydown", k); } });
   document.body.appendChild(bd);
 }
+function explainAds(){
+  showModal(`<h3>Ads in this campaign</h3>
+    <p>The first dropdown is the main ad. Anything added below it runs <b>alongside</b> it, in the same ad groups, so Google rotates the copy.</p>
+    <p>Google allows <b>3 responsive search ads per ad group</b>, so the control stops at three.</p>
+    <p>When the submission doc names several ads for one keyword theme &mdash; like "Ensure HMB / Ensure Max Protein / Ensure 42g" &mdash; all of them are mapped here automatically. Check them before exporting.</p>`);
+}
 function explainBorrow(){
   showModal(`<h3>Also pull keywords from</h3>
     <p>This adds another theme's keywords to this campaign <b>in addition to</b> the keywords it already has. Nothing is moved or reassigned.</p>
@@ -1409,7 +1499,8 @@ function explainRed(){
 document.addEventListener("click", e => {
   if(!e.target.closest) return;
   if(e.target.closest(".redflag")){ e.preventDefault(); explainRed(); return; }
-  if(e.target.closest("#borrowInfo")){ e.preventDefault(); explainBorrow(); }
+  if(e.target.closest("#borrowInfo")){ e.preventDefault(); explainBorrow(); return; }
+  if(e.target.closest("#adsInfo")){ e.preventDefault(); explainAds(); }
 });
 
 loadLocal(); syncDefChips();
