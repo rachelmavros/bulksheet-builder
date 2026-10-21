@@ -191,7 +191,7 @@ option.custom{font-style:italic}
 
 <nav class="steps"><div class="steps-in" role="tablist">
   <button class="step" role="tab" data-step="0" aria-selected="true"><span class="num">1</span>Load file</button>
-  <button class="step" role="tab" data-step="1" aria-selected="false" disabled><span class="num">2</span>Defaults</button>
+  <button class="step" role="tab" data-step="1" aria-selected="false" disabled><span class="num">2</span>Naming Conventions</button>
   <button class="step" role="tab" data-step="2" aria-selected="false" disabled><span class="num">3</span>Campaigns</button>
   <button class="step" role="tab" data-step="3" aria-selected="false" disabled><span class="num">4</span>Keywords</button>
   <button class="step" role="tab" data-step="4" aria-selected="false" disabled><span class="num">5</span>Ad copy</button>
@@ -248,15 +248,15 @@ option.custom{font-style:italic}
       <div class="grid g3">
         <div><label class="fl" for="dStatus">Campaign status column</label>
           <select id="dStatus"><option>Paused</option><option>Enabled</option><option>Add</option></select></div>
-        <div><label class="fl" for="dLabel">Label</label><input type="text" id="dLabel" class="eg" placeholder="e.g. 10/26_Alimentum_Asset Refresh">
-          <p style="margin:5px 0 0;font-size:11.5px;color:var(--ink-3);line-height:1.45">
-            Launch date (MM/YY) _ Product _ Purpose <span style="opacity:.8">(purpose optional)</span></p></div>
+        <div><label class="fl" for="dSnippetStatus">Structured snippet status</label>
+          <select id="dSnippetStatus"><option>Paused</option><option>Enabled</option><option>add</option></select></div>
         <div><label class="fl" for="dExtStatus">Extension status</label>
           <select id="dExtStatus"><option>Paused</option><option>Enabled</option><option>add</option></select></div>
       </div>
       <div class="grid g3" style="margin-top:14px">
-        <div><label class="fl" for="dSnippetStatus">Structured snippet status</label>
-          <select id="dSnippetStatus"><option>Paused</option><option>Enabled</option><option>add</option></select></div>
+        <div><label class="fl" for="dLabel">Campaign label</label><input type="text" id="dLabel" class="eg" placeholder="e.g. 10/26_Alimentum_Asset Refresh">
+          <p style="margin:5px 0 0;font-size:11.5px;color:var(--ink-3);line-height:1.45">
+            Launch date (MM/YY) _ Product _ Purpose <span style="opacity:.8">(purpose optional)</span></p></div>
       </div>
     </div>
   </section>
