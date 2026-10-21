@@ -1,3 +1,4 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -148,6 +149,18 @@ code.k{font-family:"IBM Plex Mono",monospace;background:var(--rule-2);padding:1p
 .camplist label{display:flex;gap:7px;align-items:flex-start;font-size:12px;font-family:"IBM Plex Mono",monospace;color:var(--ink-2)}
 .infoq{appearance:none;width:15px;height:15px;border-radius:50%;border:1px solid var(--ink-3);background:none;color:var(--ink-3);font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;line-height:1;cursor:pointer;padding:0;vertical-align:1px}
 .infoq:hover{background:var(--ink-blue);border-color:var(--ink-blue);color:#fff}
+input.eg::placeholder{font-style:italic}
+.resetlink{appearance:none;border:0;background:none;padding:0;margin-left:8px;font:inherit;font-size:11px;font-weight:400;color:var(--ink-blue);cursor:pointer}
+.resetlink:hover{text-decoration:underline}
+.tplhint{margin:5px 0 0;font-size:11.5px;color:var(--ink-3);word-break:break-all;line-height:1.45}
+.tplhint .tok{background:var(--accent-soft);color:var(--accent);border-radius:3px;padding:0 3px}
+.tplhint .dim{color:var(--ink-3)}
+.valwrap{display:flex;gap:5px;align-items:center}
+.valwrap select{flex:none;width:auto;min-width:96px}
+.valwrap input{flex:1;min-width:0}
+option.custom{font-style:italic}
+.req{font-size:10.5px;font-family:"IBM Plex Mono",monospace;color:var(--warn);background:var(--warn-soft);border-radius:3px;padding:1px 5px;margin-left:5px}
+.fromdoc{font-size:12px;color:var(--ink-3);font-style:italic}
 .stack{display:flex;flex-direction:column;gap:4px}
 .slot{display:flex;gap:4px;align-items:center}
 .slot select{flex:1;min-width:0}
@@ -234,29 +247,37 @@ code.k{font-family:"IBM Plex Mono",monospace;background:var(--rule-2);padding:1p
     <div class="panel-body">
       <div class="grid g3">
         <div><label class="fl" for="dStatus">Campaign status column</label>
-          <select id="dStatus"><option>paused</option><option>enabled</option><option>add</option></select></div>
-        <div><label class="fl" for="dLabel">Label</label><input type="text" id="dLabel" placeholder="Whole Milk Launch 9.1.26 Current"></div>
+          <select id="dStatus"><option>Paused</option><option>Enabled</option><option>Add</option></select></div>
+        <div><label class="fl" for="dLabel">Label</label><input type="text" id="dLabel" class="eg" placeholder="e.g. 10/26_Alimentum_Asset Refresh">
+          <p style="margin:5px 0 0;font-size:11.5px;color:var(--ink-3);line-height:1.45">
+            Launch date (MM/YY) _ Product _ Purpose <span style="opacity:.8">(purpose optional)</span></p></div>
         <div><label class="fl" for="dExtStatus">Extension status</label>
           <select id="dExtStatus"><option>Paused</option><option>Enabled</option><option>add</option></select></div>
       </div>
       <div class="grid g3" style="margin-top:14px">
         <div><label class="fl" for="dSnippetStatus">Structured snippet status</label>
-          <select id="dSnippetStatus"><option>add</option><option>Paused</option><option>Enabled</option></select></div>
+          <select id="dSnippetStatus"><option>Paused</option><option>Enabled</option><option>add</option></select></div>
       </div>
     </div>
   </section>
   <section class="panel">
-    <div class="panel-head"><h2>Campaign name template</h2><p>Pre-fills names on the next step. Everything stays editable there.</p></div>
+    <div class="panel-head"><h2>Naming convention</h2><p>Tick a field below and it appears in the template. Edit a template directly to override it.</p></div>
     <div class="panel-body">
-      <label class="fl" for="tpl">Template</label>
-      <input type="text" id="tpl" class="mono" value="{brand}_US_English_{type}_{theme}_AMZ_{year}">
-      <p style="margin:8px 0 0;font-size:12.5px;color:var(--ink-3)">
-        Campaign name: <code class="k">{brand}</code> &middot; <code class="k">{type}</code> Brand / Non-Brand / Competitive &middot; <code class="k">{theme}</code> theme minus its prefix &middot; <code class="k">{year}</code> &middot; <code class="k">{full}</code> raw theme.<br>
-        Ad group name: <code class="k">{theme}</code> and <code class="k">{match type}</code>.</p>
-      <div class="grid g3" style="margin-top:14px">
-        <div><label class="fl" for="brand">{brand} <span style="color:var(--ink-3);font-weight:400">&mdash; detected from the file</span></label><input type="text" id="brand" placeholder="Similac"></div>
-        <div><label class="fl" for="tplYear">{year}</label><input type="text" id="tplYear" value="2026"></div>
-        <div><label class="fl" for="agTpl">Ad group name</label><input type="text" id="agTpl" class="mono" value="{theme} - {match type}"></div>
+      <div class="grid g2">
+        <div><label class="fl" for="campTpl">Campaign name</label>
+          <input type="text" id="campTpl" class="mono" value="{brand}_{engine}_{country}_{language}_{campaign type}_{keyword theme}_{asset #}">
+          <p class="tplhint mono" id="npCampaign"></p></div>
+        <div><label class="fl" for="agTpl">Ad group name <button type="button" class="resetlink" id="resetNames">reset to defaults</button></label>
+          <input type="text" id="agTpl" class="mono" value="{theme}_{match type}">
+          <p class="tplhint mono" id="npAdGroup"></p></div>
+      </div>
+
+      <div class="tablewrap" style="margin-top:16px"><table id="nameTable">
+        <thead><tr><th style="width:34px">Use</th><th style="width:200px">Field</th><th style="width:250px">Value</th><th>Allowed</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+
+      <div class="grid g2" style="margin-top:16px">
         <div><label class="fl">Default match types</label>
           <div class="chips" id="defMatch">
             <button class="chip" data-m="Exact" aria-pressed="true">Exact</button>
@@ -264,6 +285,7 @@ code.k{font-family:"IBM Plex Mono",monospace;background:var(--rule-2);padding:1p
             <button class="chip" data-m="Broad" aria-pressed="true">Broad</button>
           </div></div>
       </div>
+
       <details class="adv"><summary>Parenthetical handling</summary>
         <div style="margin-top:10px"><label style="display:flex;gap:8px;align-items:flex-start">
           <input type="checkbox" id="stripParens" checked>
@@ -417,7 +439,7 @@ code.k{font-family:"IBM Plex Mono",monospace;background:var(--rule-2);padding:1p
 
 <script>
 "use strict";
-const S = {step:0, ceTheme:null, kwOverride:{}, kwLog:[], overlap:{}, kwFilter:{q:"", camp:"", status:"excluded"}, raw:null, map:[], ext:{sitelinks:[],callouts:[],snippets:[]}, copy:{}, out:null, issues:[], campaigns:[], fills:{}, defMatch:["Exact","Broad"], redCount:{kw:0,hl:0,de:0,ext:0}};
+const S = {step:0, nameOn:{}, nameVal:{}, nameSet:{}, ceTheme:null, kwOverride:{}, kwLog:[], overlap:{}, kwFilter:{q:"", camp:"", status:"excluded"}, raw:null, map:[], ext:{sitelinks:[],callouts:[],snippets:[]}, copy:{}, out:null, issues:[], campaigns:[], fills:{}, defMatch:["Exact","Broad"], redCount:{kw:0,hl:0,de:0,ext:0}};
 const MATCHES = ["Exact","Phrase","Broad"];
 const LIMITS = {headline:30, description:90, path:15, sitelinkText:25, sitelinkDesc:35, callout:25, snippetValue:25};
 const FILL_ERR = "FFF8C9C4", FILL_WARN = "FFFFE08A", FILL_DUP = "FFFFC000";
@@ -467,9 +489,10 @@ function cellRed(sh, r, c){
 /* --- storage ------------------------------------------------------------ */
 function saveLocal(){
   try{ localStorage.setItem("bulksheet.settings", JSON.stringify({
+    v:3,
     status:$("#dStatus").value, label:$("#dLabel").value, extStatus:$("#dExtStatus").value,
     snipStatus:$("#dSnippetStatus").value,
-    tpl:$("#tpl").value, year:$("#tplYear").value, agTpl:$("#agTpl").value,
+    nameOn:S.nameOn, nameVal:S.nameVal, nameSet:S.nameSet, agTpl:$("#agTpl").value, campTpl:$("#campTpl").value,
     defMatch:S.defMatch, strip:$("#stripParens").checked, omitRed:$("#omitRed").checked
   })); }catch(e){}
 }
@@ -477,13 +500,17 @@ function loadLocal(){
   try{
     const r = localStorage.getItem("bulksheet.settings"); if(!r) return;
     const d = JSON.parse(r);
-    if(d.status) $("#dStatus").value = d.status;
+    const fresh = d.v >= 3;                       // older saves predate the current defaults
+    if(d.status && fresh) $("#dStatus").value = d.status;
+    else if(d.status) $("#dStatus").value = d.status.charAt(0).toUpperCase() + d.status.slice(1);
     if(d.label != null) $("#dLabel").value = d.label;
     if(d.extStatus) $("#dExtStatus").value = d.extStatus;
-    if(d.snipStatus) $("#dSnippetStatus").value = d.snipStatus;
-    if(d.tpl) $("#tpl").value = d.tpl.replace(/^(Similac|PediaSure|Pedialyte|Ensure|Glucerna|EleCare)_/i, "{brand}_");
-    if(d.year) $("#tplYear").value = d.year;
-    if(d.agTpl) $("#agTpl").value = d.agTpl.replace(/\{base\}/gi, "{theme}").replace(/\{match\}/gi, "{match type}");
+    if(d.snipStatus && fresh) $("#dSnippetStatus").value = d.snipStatus;
+    if(fresh && d.nameOn && typeof d.nameOn === "object") S.nameOn = d.nameOn;
+    if(fresh && d.nameVal && typeof d.nameVal === "object") S.nameVal = d.nameVal;
+    if(fresh && d.nameSet && typeof d.nameSet === "object") S.nameSet = d.nameSet;
+    if(fresh && d.campTpl) $("#campTpl").value = d.campTpl;
+    if(d.agTpl) $("#agTpl").value = d.agTpl.replace(/\{base\}/gi, "{theme}").replace(/\{match\}/gi, "{match type}").replace(/\s+-\s+/g, "_");
     if(typeof d.strip === "boolean") $("#stripParens").checked = d.strip;
     if(typeof d.omitRed === "boolean") $("#omitRed").checked = d.omitRed;
     if(Array.isArray(d.defMatch) && d.defMatch.length){ S.defMatch = d.defMatch; syncDefChips(); }
@@ -499,7 +526,7 @@ function go(n){
   $("#next").classList.toggle("hide", n === 6);
   $("#dl").classList.toggle("hide", n !== 6);
   $("#barMsg").textContent = "";
-  if(n === 1) renderRedSummary();
+  if(n === 1){ renderRedSummary(); renderNameFields(); }
   if(n === 2) renderMap();
   if(n === 3){ build(); renderKeywords(); }
   if(n === 4) renderCopyEditor();
@@ -695,7 +722,9 @@ function parseWorkbook(wb, fname){
   }
 
   S.raw = {keywords, rsa, ext, fname};
-  $("#brand").value = detectBrand(fname, keywords, rsa) || $("#brand").value;
+  if(!fieldVal("brand")) S.nameVal.brand = detectBrand(fname, keywords, rsa) || "";
+  syncTemplateFromFields();
+  renderNameFields();
   S.ext = ext;
   buildCopy();
   buildMap();
@@ -764,19 +793,73 @@ function renderRedSummary(){
 /* --- naming ------------------------------------------------------------- */
 function classify(theme){
   const t = theme.toLowerCase();
-  if(t.startsWith("competitor") || t.startsWith("competitive")) return "Competitive";
+  if(t.startsWith("competitor") || t.startsWith("competitive") || t.startsWith("conquest")) return "Conquesting";
   if(t.startsWith("non-brand") || t.startsWith("nonbrand") || t.startsWith("non brand")) return "Non-Brand";
   return "Brand";
 }
+
+/* Campaign naming fields, in the order they are joined by underscores.
+   kind "free"  = typed value, "opts" = fixed list, "doc" = comes from the submission doc,
+   kind "match" = resolved per ad group at build time. */
+const NAME_FIELDS = [
+  {id:"brand",    tok:"brand",           label:"Brand Name",             kind:"free", on:true,  ph:"CoreDx",      note:"anything", req:true, auto:"detected from the file"},
+  {id:"engine",   tok:"engine",          label:"Engine",                 kind:"opts", on:true,  opts:["Google","MSFT"]},
+  {id:"country",  tok:"country",         label:"Country",                kind:"opts", on:true,  opts:["US","UK","CA"]},
+  {id:"language", tok:"language",        label:"Language",               kind:"opts", on:true,  opts:["EN","FR","SP"]},
+  {id:"format",   tok:"campaign format", label:"Campaign Format",        kind:"opts", on:false, opts:["PMAX","AI Max","Search","App","Shopping"]},
+  {id:"ctype",    tok:"campaign type",   label:"Campaign Type",          kind:"doc",  on:true,  doc:"Brand / Non-Brand / Conquesting, read from the theme", opts:["Brand","Non-Brand","Conquesting"]},
+  {id:"theme",    tok:"keyword theme",   label:"Keyword Theme",          kind:"doc",  on:true,  doc:"the theme name from the doc", note:"anything", opts:[]},
+  {id:"match",    tok:"match type",      label:"Match Type",             kind:"match",on:false, note:"Exact, Phrase, Broad \u2014 splits each theme into one campaign per match type"},
+  {id:"retailer", tok:"retailer",        label:"Retailer Destination",   kind:"opts", on:false, opts:["AMZ","WEB","WMT"]},
+  {id:"product",  tok:"product",         label:"Product Name / Ad Name", kind:"doc",  on:false, ph:"3TC Formula", doc:"the ad mapped to each theme", note:"anything", opts:[]},
+  {id:"asset",    tok:"asset #",         label:"Client Approved Asset #",kind:"free", on:true,  ph:"12345",       note:"anything", req:true}
+];
+const DOC_DEFAULT = "Pull from doc";
+const CUSTOM = "\u2014 custom \u2014";
+const nf = id => NAME_FIELDS.find(f => f.id === id);
+function fieldOn(id){ const f = nf(id); return S.nameOn[id] !== undefined ? S.nameOn[id] : f.on; }
+function fieldVal(id){ const f = nf(id); return S.nameVal[id] !== undefined ? S.nameVal[id] : (f.kind === "opts" ? f.opts[0] : ""); }
+
+/* value of one field for a given theme; "" drops it from the name */
+function fieldFor(id, theme, adName){
+  switch(id){
+    case "ctype":   return fieldVal("ctype") || classify(theme);
+    case "theme":   return baseName(theme);
+    case "match":   return "{match type}";         // resolved per ad group in build()
+    case "product": return fieldVal("product").trim() || (adName || "");
+    default:        return fieldVal(id).trim();
+  }
+}
+/* the template is what builds the name; ticking a field just edits the template */
+function campaignName(theme, adName){
+  let out = ($("#campTpl").value || "").trim();
+  if(!out) return theme;
+  NAME_FIELDS.forEach(f => {
+    if(f.id === "match") return;                   // left in place for build() to resolve
+    out = out.replace(new RegExp("\\{" + f.tok + "\\}", "gi"), fieldFor(f.id, theme, adName));
+  });
+  // drop separators left behind by fields with no value
+  return out.replace(/_{2,}/g, "_").replace(/^_+|_+$/g, "") || theme;
+}
+/* what a field shows in the template: its set value, else its {token} */
+function tplPart(f){
+  if(f.kind === "match") return "{" + f.tok + "}";       // resolved per ad group
+  const v = fieldVal(f.id).trim();
+  if(!v) return "{" + f.tok + "}";                     // nothing set, or pulled from the doc
+  // a dropdown always shows its value; a typed field shows one once it's filled in
+  if(f.kind === "opts" || S.nameSet[f.id]) return v;
+  return "{" + f.tok + "}";
+}
+/* rewrite the template from the ticked fields, keeping their canonical order */
+function syncTemplateFromFields(){
+  $("#campTpl").value = NAME_FIELDS.filter(f => fieldOn(f.id)).map(tplPart).join("_");
+}
+/* the campaign name for one ad group, once the match type is known */
+function campaignFor(name, match){ return String(name).replace(/\{match type\}/gi, match); }
 function baseName(theme){
   let s = theme.replace(/^(brand|non-?\s?brand|competitor|competitive)\s*[-\u2013\u2014:]\s*/i, "").trim();
   if($("#stripParens").checked) s = s.replace(/\s*\([^)]*\)\s*$/, "").trim();
   return s || theme;
-}
-function campaignName(theme){
-  return ($("#tpl").value || "{full}")
-    .replace(/\{brand\}/g, $("#brand").value.trim() || "BRAND").replace(/\{type\}/g, classify(theme)).replace(/\{theme\}/g, baseName(theme))
-    .replace(/\{year\}/g, $("#tplYear").value || "").replace(/\{full\}/g, theme).trim();
 }
 function borrowBase(theme, dest){
   let b = baseName(theme);
@@ -784,7 +867,7 @@ function borrowBase(theme, dest){
   return b;
 }
 function adGroupName(base, match){
-  return ($("#agTpl").value || "{theme} - {match type}")
+  return ($("#agTpl").value || "{theme}_{match type}")
     .replace(/\{match type\}/gi, match).replace(/\{match\}/gi, match)
     .replace(/\{theme\}/gi, base).replace(/\{base\}/gi, base).trim();
 }
@@ -839,11 +922,11 @@ function buildMap(){
     const allRed = rows.length > 0 && rows.every(r => r.red);
     return {theme, count:rows.length, red:rows.filter(r => r.red).length, msg, allRed, multi,
       on: !/tbd|not currently supporting|n\/a/i.test(msg) && !(allRed && $("#omitRed").checked),
-      campaign:campaignName(theme), base:baseName(theme), matches:S.defMatch.slice(),
+      campaign:campaignName(theme, rsaTheme), base:baseName(theme), matches:S.defMatch.slice(),
       rsaTheme, extraAds: guesses.slice(1, 3), path1:p[0], path2:p[1], finalUrl:modeURL(rows.filter(r=>!r.red).map(r=>r.url))};
   });
 }
-function reapplyTemplate(){ S.map.forEach(m => { m.campaign = campaignName(m.theme); m.base = baseName(m.theme); }); renderMap(); }
+function reapplyTemplate(){ S.map.forEach(m => { m.campaign = campaignName(m.theme, m.rsaTheme); m.base = baseName(m.theme); }); drawNamePreview(); renderMap(); }
 $("#reapply").addEventListener("click", reapplyTemplate);
 $("#selAll").addEventListener("click", () => { S.map.forEach(m => m.on = true); renderMap(); });
 $("#selNone").addEventListener("click", () => { S.map.forEach(m => m.on = false); renderMap(); });
@@ -854,6 +937,61 @@ $$("#defMatch .chip").forEach(c => c.addEventListener("click", () => {
   syncDefChips(); S.map.forEach(r => r.matches = S.defMatch.slice());
 }));
 
+function renderNameFields(){
+  const tb = $("#nameTable tbody");
+  tb.innerHTML = NAME_FIELDS.map(f => {
+    const on = fieldOn(f.id), v = fieldVal(f.id);
+    const isCustom = f.opts && v && !f.opts.includes(v);
+    let ctl;
+    if(f.kind === "match") ctl = `<span class="fromdoc">Per ad group</span>`;
+    else if(f.opts)
+      ctl = `<div class="valwrap">
+        <select data-nv="${f.id}">
+          ${f.kind === "doc" ? `<option value="" ${!v?"selected":""}>${DOC_DEFAULT}</option>` : ""}
+          ${f.opts.map(o => `<option ${v===o?"selected":""}>${esc(o)}</option>`).join("")}
+          <option class="custom" value="${CUSTOM}" ${isCustom?"selected":""}>${CUSTOM}</option>
+        </select>
+        ${isCustom ? `<input type="text" data-nvc="${f.id}" value="${esc(v)}" placeholder="type a value">` : ""}
+      </div>`;
+    else ctl = `<div class="valwrap"><input type="text" data-nv="${f.id}" value="${esc(v)}" placeholder="${esc(f.ph||"")}"></div>`;
+    const allowed = f.kind === "doc" ? (f.doc || "") + (f.opts && f.opts.length ? ", or " + f.opts.join(" / ") : "") + ", or custom"
+      : f.opts ? f.opts.join(", ") + ", or custom" : (f.note || "");
+    return `<tr class="${on?"":"off"}">
+      <td><input type="checkbox" data-non="${f.id}" ${on?"checked":""}></td>
+      <td>${esc(f.label)}${f.auto?`<div style="font-size:11px;color:var(--ink-3)">auto: ${esc(f.auto)}</div>`:""}${f.req?`<span class="req">required unless unavailable</span>`:""}</td>
+      <td>${ctl}</td>
+      <td style="font-size:12px;color:var(--ink-3)">${esc(allowed)}</td>
+    </tr>`;
+  }).join("");
+  tb.querySelectorAll("[data-non]").forEach(el => el.addEventListener("change", e => {
+    S.nameOn[e.target.dataset.non] = e.target.checked;
+    syncTemplateFromFields();
+    renderNameFields(); if(S.map.length) reapplyTemplate();
+  }));
+  tb.querySelectorAll("select[data-nv]").forEach(el => el.addEventListener("change", e => {
+    const id = e.target.dataset.nv;
+    S.nameVal[id] = e.target.value === CUSTOM ? " " : e.target.value;   // a space keeps "custom" selected until typed
+    S.nameSet[id] = !!S.nameVal[id].trim();                             // "Pull from doc" clears it back to a token
+    syncTemplateFromFields();
+    renderNameFields(); if(S.map.length) reapplyTemplate();
+  }));
+  tb.querySelectorAll("input[data-nv],input[data-nvc]").forEach(el => el.addEventListener("input", e => {
+    const fid = e.target.dataset.nv || e.target.dataset.nvc;
+    S.nameVal[fid] = e.target.value;
+    S.nameSet[fid] = !!e.target.value.trim();
+    syncTemplateFromFields();
+    drawNamePreview(); if(S.map.length) reapplyTemplate();
+  }));
+  drawNamePreview();
+}
+function drawNamePreview(){
+  const row = S.map[0], sample = (row && row.theme) || "Brand - Alimentum";
+  const name = campaignName(sample, row && row.rsaTheme);
+  $("#npCampaign").innerHTML = name
+    ? esc(name).replace(/\{match type\}/gi, `<span class="tok">Exact</span>`)
+    : `<span class="dim">no fields selected</span>`;
+  $("#npAdGroup").innerHTML = esc(adGroupName(baseName(sample), "Exact"));
+}
 function slotRow(inner, rmAttrs){
   return `<div class="slot">${inner}${rmAttrs ? `<button type="button" class="rm" ${rmAttrs} title="remove">&times;</button>` : `<span class="pad"></span>`}</div>`;
 }
@@ -1118,7 +1256,9 @@ function drawCopy(theme){
 /* --- extensions --------------------------------------------------------- */
 function liveCampaigns(){
   const out = [];
-  S.map.filter(m => m.on && m.matches.length).forEach(m => { if(!out.includes(m.campaign)) out.push(m.campaign); });
+  S.map.filter(m => m.on && m.matches.length).forEach(m => m.matches.forEach(mt => {
+    const c = campaignFor(m.campaign, mt); if(!out.includes(c)) out.push(c);
+  }));
   return out;
 }
 function scopeUI(kind, i, o, camps){
@@ -1230,7 +1370,7 @@ function build(){
 
   const log = [], seenRow = new Map(), dupGroups = new Set();
   live.forEach(m => {
-    if(!campaigns.includes(m.campaign)) campaigns.push(m.campaign);
+    const addCamp = c => { if(!campaigns.includes(c)) campaigns.push(c); return c; };
     // own theme first, then any themes borrowed into this campaign
     const sources = [{theme:m.theme, base:m.base, own:true}].concat(
       (m.extra || []).filter(t => t !== m.theme && byTheme.has(t)).map(t => ({theme:t, base:borrowBase(t, m), own:false})));
@@ -1254,14 +1394,16 @@ function build(){
           if(ov === "include") include = true;
           // borrowed keywords keep their original landing page
           const url = k.url || (src.own ? m.finalUrl : srcUrl);
-          const rowKey = m.campaign + "|" + ag + "|" + k.kw.toLowerCase() + "|" + match;
-          const rec = {campaign:m.campaign, ag, theme:k.theme, kw:k.kw, match, url, reason, include, override:ov,
+          const camp = campaignFor(m.campaign, match);
+          const rowKey = camp + "|" + ag + "|" + k.kw.toLowerCase() + "|" + match;
+          const rec = {campaign:camp, ag, theme:k.theme, kw:k.kw, match, url, reason, include, override:ov,
                        borrowed:!src.own, urlProb:urlProblem(url), key, dup:false};
           log.push(rec);
           if(!rec.include) return;
           kept++;
           const ri = out.Keywords.length;
-          out.Keywords.push([status, m.campaign, ag, k.kw, match, url, label]);
+          addCamp(camp);
+          out.Keywords.push([status, camp, ag, k.kw, match, url, label]);
           // duplicates stay in the sheet; every copy is flagged so a person picks which to keep
           if(seenRow.has(rowKey)){
             rec.dup = true;
@@ -1271,7 +1413,7 @@ function build(){
             mark("Keywords", ri, 3, "dup", "Duplicate row \u2014 this keyword, match type and ad group appear more than once. Pick which to keep.");
             mark("Keywords", first.ri, 3, "dup", "Duplicate row \u2014 this keyword, match type and ad group appear more than once. Pick which to keep.");
           } else seenRow.set(rowKey, {ri, rec});
-          if(rec.urlProb){ mark("Keywords", ri, 5, "err", rec.urlProb); const gk = m.campaign + "|" + rec.urlProb; urlAgg[gk] = (urlAgg[gk]||0)+1; }
+          if(rec.urlProb){ mark("Keywords", ri, 5, "err", rec.urlProb); const gk = camp + "|" + rec.urlProb; urlAgg[gk] = (urlAgg[gk]||0)+1; }
           if(reason && reason !== "Excluded manually") mark("Keywords", ri, 3, "warn", `Not MLR approved \u2014 ${reason.toLowerCase()}, included ${ov === "include" ? "by manual override" : "because the omit filter is off"}`);
         });
       });
@@ -1296,11 +1438,12 @@ function build(){
       const tf = (t && t.finals && t.finals.length) ? modeURL(t.finals) : "";
       const adUrl = tf || m.finalUrl;
       const adUrlProblem = urlProblem(adUrl);
-      if(adUrlProblem) issues.push({lvl:"err", t:`${adUrlProblem}: RSA final URL for ad "${adName}" in ${m.campaign}.`});
+      if(adUrlProblem) issues.push({lvl:"err", t:`${adUrlProblem}: RSA final URL for ad "${adName}" in ${campaignFor(m.campaign, m.matches[0] || "Exact")}.`});
 
       m._groups.forEach(g => m.matches.forEach(match => {
         const ag = adGroupName(g.base, match), ri = out.RSA.length;
-        const row = [status, m.campaign, ag];
+        const adCamp = addCamp(campaignFor(m.campaign, match));
+        const row = [status, adCamp, ag];
         row.push(hls[0] ? hls[0].text : "", pinPos);
         for(let i = 1; i < 15; i++) row.push(hls[i] ? hls[i].text : "");
         for(let i = 0; i < 4; i++) row.push(des[i] ? des[i].text : "");
@@ -1316,7 +1459,7 @@ function build(){
           if(d.text.length > LIMITS.description){ mark("RSA", ri, col, "err", `Description ${i+1} is ${d.text.length}/${LIMITS.description} characters`); issues.push({lvl:"err", t:`Ad "${adName}" \u2014 description ${i+1} is ${d.text.length}/${LIMITS.description}: "${d.text}"`}); }
           else if(d.red && !omit) mark("RSA", ri, col, "warn", "Not MLR approved \u2014 marked red in the submission doc");
         });
-        [[m.path1,23,1],[m.path2,24,2]].forEach(([p, col, nth]) => { if(p && p.length > LIMITS.path){ mark("RSA", ri, col, "err", `Path ${nth} is ${p.length}/${LIMITS.path}`); issues.push({lvl:"err", t:`Ad "${adName}" in ${m.campaign} \u2014 path ${nth} is ${p.length}/${LIMITS.path}: "${p}"`}); } });
+        [[m.path1,23,1],[m.path2,24,2]].forEach(([p, col, nth]) => { if(p && p.length > LIMITS.path){ mark("RSA", ri, col, "err", `Path ${nth} is ${p.length}/${LIMITS.path}`); issues.push({lvl:"err", t:`Ad "${adName}" in ${adCamp} \u2014 path ${nth} is ${p.length}/${LIMITS.path}: "${p}"`}); } });
         if(adUrlProblem) mark("RSA", ri, 25, "err", adUrlProblem);
       }));
     }
@@ -1504,7 +1647,21 @@ document.addEventListener("click", e => {
 });
 
 loadLocal(); syncDefChips();
-["#tpl","#tplYear","#agTpl","#stripParens","#brand"].forEach(s => $(s).addEventListener("change", () => { if(S.map.length) reapplyTemplate(); }));
+["#agTpl","#campTpl","#stripParens"].forEach(sel => $(sel).addEventListener("change", () => { renderNameFields(); if(S.map.length) reapplyTemplate(); }));
+["#agTpl","#campTpl"].forEach(sel => $(sel).addEventListener("input", () => { renderNameFields(); }));
+$("#resetNames").addEventListener("click", () => {
+  S.nameOn = {}; S.nameSet = {};
+  const b = S.nameVal.brand;                    // keep the brand detected from the file
+  S.nameVal = b ? {brand:b} : {};
+  $("#agTpl").value = "{theme}_{match type}";
+  syncTemplateFromFields(); renderNameFields();
+  if(S.map.length) reapplyTemplate();
+});
+
+syncTemplateFromFields();
+renderNameFields();
 </script>
 </body>
 </html>
+
+</body></html>
